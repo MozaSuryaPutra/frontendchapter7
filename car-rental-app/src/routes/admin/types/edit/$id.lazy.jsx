@@ -1,81 +1,81 @@
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Card from 'react-bootstrap/Card'
-import Form from 'react-bootstrap/Form'
-import Button from 'react-bootstrap/Button'
-import { getTypeById, updateType } from '../../../service/carType'
-import { toast } from 'react-toastify'
-import Protected from '../../../components/Auth/Protected'
-import { useQuery } from '@tanstack/react-query'
-import { useSelector } from 'react-redux'
-import { useMutation } from '@tanstack/react-query'
+import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Card from "react-bootstrap/Card";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import { getTypeById, updateType } from "../../../../service/carType";
+import { toast } from "react-toastify";
+import Protected from "../../../../components/Auth/Protected";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
-export const Route = createLazyFileRoute('/admin/types/edit/$id')({
+export const Route = createLazyFileRoute("/admin/types/edit/$id")({
   component: () => (
     <Protected roles={[1]}>
       <EditTypes />
     </Protected>
   ),
-})
+});
 
 function EditTypes() {
-  const navigate = useNavigate()
-  const { id } = Route.useParams()
-  const [body_style, setBodyStyle] = useState('')
-  const [capacity, setCapacity] = useState('')
-  const [fuel_type, setFuelType] = useState('')
-  const { token } = useSelector((state) => state.auth)
+  const navigate = useNavigate();
+  const { id } = Route.useParams();
+  const [body_style, setBodyStyle] = useState("");
+  const [capacity, setCapacity] = useState("");
+  const [fuel_type, setFuelType] = useState("");
+  const { token } = useSelector((state) => state.auth);
 
   const { data, isSuccess, isLoading } = useQuery({
-    queryKey: ['types', id],
+    queryKey: ["types", id],
     queryFn: () => getTypeById(id),
     enabled: !!token,
     retry: 0,
-  })
+  });
 
   useEffect(() => {
     if (isSuccess && data) {
-      setBodyStyle(data.body_style || '')
-      setCapacity(data.capacity || '')
-      setFuelType(data.fuel_type || '')
+      setBodyStyle(data.body_style || "");
+      setCapacity(data.capacity || "");
+      setFuelType(data.fuel_type || "");
     }
-  }, [data, isSuccess])
+  }, [data, isSuccess]);
 
   const { mutate: editCarType } = useMutation({
     mutationFn: (body) => {
-      return updateType(id, body)
+      return updateType(id, body);
     },
     onSuccess: () => {
-      toast.success('Type edited successfully!')
-      navigate({ to: '/types' })
+      toast.success("Type edited successfully!");
+      navigate({ to: "/admin/types" });
     },
     onError: (err) => {
-      toast.error(err?.message)
+      toast.error(err?.message);
     },
-  })
+  });
 
   const onSubmit = async (event) => {
-    event.preventDefault()
-    console.log(body_style)
+    event.preventDefault();
+    console.log(body_style);
     if (capacity <= 0) {
-      toast.error('Capacity harus lebih dari 0')
-      return
+      toast.error("Capacity harus lebih dari 0");
+      return;
     }
 
     const result = {
       body_style: body_style,
       capacity: capacity,
       fuel_type: fuel_type,
-    }
+    };
 
-    editCarType(result)
-  }
+    editCarType(result);
+  };
 
   // Handling loading state
   if (isLoading) {
-    return <div>Loading...</div> // You can return a loading spinner or placeholder here
+    return <div>Loading...</div>; // You can return a loading spinner or placeholder here
   }
 
   return (
@@ -84,11 +84,11 @@ function EditTypes() {
         <Button
           variant="outline-primary"
           style={{
-            width: '150px',
-            marginRight: 'auto',
+            width: "150px",
+            marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: '/types' })
+            navigate({ to: "/admin/types" });
           }}
         >
           Back
@@ -112,7 +112,7 @@ function EditTypes() {
                       required
                       value={body_style}
                       onChange={(event) => {
-                        setBodyStyle(event.target.value)
+                        setBodyStyle(event.target.value);
                       }}
                     />
                   </Col>
@@ -128,7 +128,7 @@ function EditTypes() {
                       required
                       value={capacity}
                       onChange={(event) => {
-                        setCapacity(event.target.value)
+                        setCapacity(event.target.value);
                       }}
                     />
                   </Col>
@@ -144,7 +144,7 @@ function EditTypes() {
                       required
                       value={fuel_type}
                       onChange={(event) => {
-                        setFuelType(event.target.value)
+                        setFuelType(event.target.value);
                       }}
                     />
                   </Col>
@@ -162,5 +162,5 @@ function EditTypes() {
         <Col md={3}></Col>
       </Row>
     </>
-  )
+  );
 }

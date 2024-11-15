@@ -1,7 +1,7 @@
 import React from "react";
 
 const FooterSection = () => (
-  <div id="footer" className="footer container mt-3 pt-lg-5">
+  <div id="footer" className="footer container mt-5 pt-lg-5">
     <div className="row align-items-start">
       <div className="col-lg-4 mt-lg-3 d-flex flex-column justify-content-start">
         <p className="mb-3">

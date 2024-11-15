@@ -52,7 +52,7 @@ function Types() {
             className="me-2"
             style={{ width: "150px", marginLeft: "auto" }}
             onClick={() => {
-              navigate({ to: "/types/create" });
+              navigate({ to: "/admin/types/create" });
             }}
           >
             Create New Type

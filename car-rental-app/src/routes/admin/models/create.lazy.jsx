@@ -5,9 +5,9 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { getType } from "../../service/carType";
-import { createModels } from "../../service/models";
-import Protected from "../../components/Auth/Protected";
+import { getType } from "../../../service/carType";
+import { createModels } from "../../../service/models";
+import Protected from "../../../components/Auth/Protected";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
@@ -49,7 +49,7 @@ function CreateModel() {
     },
     onSuccess: () => {
       toast.success("Type created successfully!");
-      navigate({ to: "/models" });
+      navigate({ to: "/admin/models" });
     },
     onError: (err) => {
       toast.error(err?.message);
@@ -119,7 +119,7 @@ function CreateModel() {
             marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: "/models" });
+            navigate({ to: "/admin/models" });
           }}
         >
           Back

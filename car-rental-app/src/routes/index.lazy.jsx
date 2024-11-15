@@ -1,7 +1,7 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { FaCheck } from "react-icons/fa";
 import Accordion from "../components/Accordion";
-import { Carousel } from "react-bootstrap";
+import { Button, Carousel } from "react-bootstrap";
 import { FaStar } from "react-icons/fa";
 import FooterSection from "../components/FooterSection";
 
@@ -10,6 +10,8 @@ export const Route = createLazyFileRoute("/")({
 });
 
 function Index() {
+  const navigate = useNavigate();
+
   // Accordion items
   const accordionItems = [
     {
@@ -52,13 +54,18 @@ function Index() {
                 kebutuhanmu untuk sewa mobil selama 24 jam.
               </p>
               <div className="d-flex justify-content-start ms-lg-5 ps-lg-5">
-                <a
+                <Button
                   className="btn btn-primary me-4"
-                  href="#"
-                  style={{ backgroundColor: "#5CB85F", borderColor: "#5CB85F" }}
+                  style={{
+                    backgroundColor: "#5CB85F",
+                    borderColor: "#5CB85F",
+                  }}
+                  onClick={() => {
+                    navigate({ to: "/search" });
+                  }}
                 >
                   Mulai Sewa Mobil
-                </a>
+                </Button>
               </div>
             </div>
             <div className="col-lg-6 mt-5 d-flex align-items-end justify-content-end">
@@ -323,6 +330,40 @@ function Index() {
               </div>
             </Carousel.Item>
           </Carousel>
+        </div>
+      </div>
+
+      <div id="start" className="start container mt-5 pt-5">
+        <div
+          className="text-center text-md-left"
+          style={{
+            backgroundColor: "#0D28A6",
+            padding: "40px 0",
+            borderRadius: "20px",
+          }}
+        >
+          <h1 style={{ color: "#ffffff" }}>
+            Sewa Mobil di (Lokasimu) Sekarang
+          </h1>
+          <p
+            className="text-justify ms-5 me-5 mt-5"
+            style={{ color: "#ffffff" }}
+          >
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+          <Button
+            className="btn btn-primary me-4"
+            style={{
+              backgroundColor: "#5CB85F",
+              borderColor: "#5CB85F",
+            }}
+            onClick={() => {
+              navigate({ to: "/search" });
+            }}
+          >
+            Mulai Sewa Mobil
+          </Button>
         </div>
       </div>
 

@@ -79,6 +79,7 @@ const NavigationBar = () => {
               </Navbar.Brand>
               <Navbar.Toggle aria-controls="responsive-navbar-nav" />
               <Navbar.Collapse id="responsive-navbar-nav">
+                <Nav className="me-auto"></Nav>
                 <Nav className="ms-auto">
                   <Nav.Link as={Link} to="/profile" onClick={handleLinkClick}>
                     <Image
@@ -92,16 +93,49 @@ const NavigationBar = () => {
                         borderRadius: "50%",
                         marginRight: "3px",
                       }}
-                    />
+                    />{" "}
                     {user?.name}
                   </Nav.Link>
                   <Nav.Link
                     onClick={(event) => {
                       handleLinkClick(event);
-                      handleLogout();
+                      handleLogout(event);
                     }}
                   >
                     Logout
+                  </Nav.Link>
+
+                  <Nav.Link
+                    as={Link}
+                    to="/admin"
+                    onClick={handleLinkClick}
+                    className="d-lg-none"
+                  >
+                    Dashboard
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/admin/cars/"
+                    onClick={handleLinkClick}
+                    className="d-lg-none"
+                  >
+                    Cars
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/admin/models/"
+                    onClick={handleLinkClick}
+                    className="d-lg-none"
+                  >
+                    Models
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/admin/types"
+                    onClick={handleLinkClick}
+                    className="d-lg-none"
+                  >
+                    Types
                   </Nav.Link>
                 </Nav>
               </Navbar.Collapse>
@@ -133,27 +167,43 @@ const NavigationBar = () => {
                 className="d-lg-flex align-items-lg-center flex-column flex-lg-row"
                 style={{ fontSize: "14px" }}
               >
-                <Nav.Link
-                  className="ms-lg-3 me-4 mt-3 mt-lg-0"
-                  href="#our-services"
-                >
-                  Our Services
-                </Nav.Link>
-                <Nav.Link className="ms-lg-3 me-4 mt-3 mt-lg-0" href="#why-us">
-                  Why Us
-                </Nav.Link>
-                <Nav.Link
-                  className="ms-lg-3 me-4 mt-3 mt-lg-0"
-                  href="#testimonial"
-                >
-                  Testimonial
-                </Nav.Link>
-                <Nav.Link
-                  className="ms-lg-3 me-4 mt-3 mt-lg-0"
-                  href="#frequent"
-                >
-                  FAQ
-                </Nav.Link>
+                {location.pathname === "/" ? (
+                  <>
+                    <Nav.Link
+                      className="ms-lg-3 me-4 mt-3 mt-lg-0"
+                      href="#our-services"
+                    >
+                      Our Services
+                    </Nav.Link>
+                    <Nav.Link
+                      className="ms-lg-3 me-4 mt-3 mt-lg-0"
+                      href="#why-us"
+                    >
+                      Why Us
+                    </Nav.Link>
+                    <Nav.Link
+                      className="ms-lg-3 me-4 mt-3 mt-lg-0"
+                      href="#testimonial"
+                    >
+                      Testimonial
+                    </Nav.Link>
+                    <Nav.Link
+                      className="ms-lg-3 me-4 mt-3 mt-lg-0"
+                      href="#frequent"
+                    >
+                      FAQ
+                    </Nav.Link>
+                  </>
+                ) : (
+                  <Nav.Link
+                    as={Link}
+                    to="/"
+                    className="ms-lg-3 me-4 mt-3 mt-lg-0"
+                    onClick={handleLinkClick}
+                  >
+                    Home
+                  </Nav.Link>
+                )}
               </Nav>
               <Nav className="ms-lg-auto mt-2">
                 {token ? (
@@ -163,8 +213,8 @@ const NavigationBar = () => {
                       to="/profile"
                       onClick={handleLinkClick}
                       style={{
-                        display: "inline-flex", // Ensure inline behavior
-                        alignItems: "center", // Vertically align content
+                        display: "inline-flex",
+                        alignItems: "center",
                       }}
                     >
                       <Image
@@ -174,7 +224,7 @@ const NavigationBar = () => {
                           width: "30px",
                           height: "30px",
                           borderRadius: "50%",
-                          marginRight: "8px", // Space between image and name
+                          marginRight: "8px",
                         }}
                       />
                       {user?.name}
@@ -182,8 +232,8 @@ const NavigationBar = () => {
                     <Nav.Link
                       className="ms-lg-3 me-4 mt-2 mt-lg-0"
                       style={{
-                        display: "inline-flex", // Ensure inline behavior
-                        alignItems: "center", // Vertically align content
+                        display: "inline-flex",
+                        alignItems: "center",
                       }}
                       onClick={(event) => {
                         handleLinkClick(event);

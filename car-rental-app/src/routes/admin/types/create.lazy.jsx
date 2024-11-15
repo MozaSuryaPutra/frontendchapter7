@@ -5,9 +5,9 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { createType } from "../../service/carType";
+import { createType } from "../../../service/carType";
 import { toast } from "react-toastify";
-import Protected from "../../components/Auth/Protected";
+import Protected from "../../../components/Auth/Protected";
 import { useMutation } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/admin/types/create")({
@@ -29,7 +29,7 @@ function CreateTypes() {
     },
     onSuccess: () => {
       toast.success("Type created successfully!");
-      navigate({ to: "/types" });
+      navigate({ to: "/admin/types" });
     },
     onError: (err) => {
       toast.error(err?.message);
@@ -68,7 +68,7 @@ function CreateTypes() {
             marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: "/types" });
+            navigate({ to: "/admin/types" });
           }}
         >
           Back

@@ -55,7 +55,7 @@ function Models() {
             className="me-2"
             style={{ width: "160px", marginLeft: "auto" }}
             onClick={() => {
-              navigate({ to: "/models/create" });
+              navigate({ to: "/admin/models/create" });
             }}
           >
             Create New Model

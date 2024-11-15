@@ -1,122 +1,122 @@
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Card from 'react-bootstrap/Card'
-import Form from 'react-bootstrap/Form'
-import Button from 'react-bootstrap/Button'
-import { getType } from '../../../service/carType'
-import { getModelsById, updateModels } from '../../../service/models'
-import Protected from '../../../components/Auth/Protected'
-import { toast } from 'react-toastify'
-import { useQuery } from '@tanstack/react-query'
-import { useSelector } from 'react-redux'
-import { useMutation } from '@tanstack/react-query'
+import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Card from "react-bootstrap/Card";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import { getType } from "../../../../service/carType";
+import { getModelsById, updateModels } from "../../../../service/models";
+import Protected from "../../../../components/Auth/Protected";
+import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
-export const Route = createLazyFileRoute('/admin/models/edit/$id')({
+export const Route = createLazyFileRoute("/admin/models/edit/$id")({
   component: () => (
     <Protected roles={[1]}>
       <EditModel />
     </Protected>
   ),
-})
+});
 
 function EditModel() {
-  const navigate = useNavigate()
-  const { id } = Route.useParams()
-  const [modelName, setModelName] = useState('')
-  const [manufacturer, setManufacturer] = useState('')
-  const [transmission, setTransmission] = useState('')
-  const [description, setDescription] = useState('')
-  const [specs, setSpecs] = useState([''])
-  const [options, setOptions] = useState([''])
-  const [type_id, setTypeId] = useState(0)
-  const { token } = useSelector((state) => state.auth)
+  const navigate = useNavigate();
+  const { id } = Route.useParams();
+  const [modelName, setModelName] = useState("");
+  const [manufacturer, setManufacturer] = useState("");
+  const [transmission, setTransmission] = useState("");
+  const [description, setDescription] = useState("");
+  const [specs, setSpecs] = useState([""]);
+  const [options, setOptions] = useState([""]);
+  const [type_id, setTypeId] = useState(0);
+  const { token } = useSelector((state) => state.auth);
   const {
     data: type,
     isSuccess,
     isPending,
   } = useQuery({
-    queryKey: ['type', id],
+    queryKey: ["type", id],
     queryFn: () => getType(),
     enabled: !!token,
     retry: 0,
-  })
+  });
 
   const {
     data: models,
     isSuccess: modelsisSuccess,
     isPending: modelsisPending,
   } = useQuery({
-    queryKey: ['models', id],
+    queryKey: ["models", id],
     queryFn: () => getModelsById(id),
     enabled: !!token,
     retry: 0,
-  })
+  });
 
   useEffect(() => {
     if (modelsisSuccess && models) {
-      setModelName(models.model_name)
-      setManufacturer(models.manufacturer)
-      setTransmission(models.transmission)
-      setDescription(models.description)
-      setSpecs(models.specs || [''])
-      setOptions(models.options || [''])
-      setTypeId(models.type_id)
+      setModelName(models.model_name);
+      setManufacturer(models.manufacturer);
+      setTransmission(models.transmission);
+      setDescription(models.description);
+      setSpecs(models.specs || [""]);
+      setOptions(models.options || [""]);
+      setTypeId(models.type_id);
     }
-  }, [models, modelsisSuccess])
+  }, [models, modelsisSuccess]);
 
   const { mutate: editCarsModels } = useMutation({
     mutationFn: (body) => {
-      return updateModels(id, body)
+      return updateModels(id, body);
     },
     onSuccess: () => {
-      toast.success('Models edited successfully!')
-      navigate({ to: '/models' })
+      toast.success("Models edited successfully!");
+      navigate({ to: "/admin/models" });
     },
     onError: (err) => {
-      toast.error(err?.message)
+      toast.error(err?.message);
     },
-  })
+  });
   // Add new empty spec and option
-  const addSpecValue = () => setSpecs([...specs, ''])
-  const addOptionValue = () => setOptions([...options, ''])
+  const addSpecValue = () => setSpecs([...specs, ""]);
+  const addOptionValue = () => setOptions([...options, ""]);
 
   // Remove spec or option by index
   const removeSpecValue = (index) => {
-    const updatedSpecs = specs.filter((_, i) => i !== index)
-    setSpecs(updatedSpecs)
-  }
+    const updatedSpecs = specs.filter((_, i) => i !== index);
+    setSpecs(updatedSpecs);
+  };
 
   const removeOptionValue = (index) => {
-    const updatedOptions = options.filter((_, i) => i !== index)
-    setOptions(updatedOptions)
-  }
+    const updatedOptions = options.filter((_, i) => i !== index);
+    setOptions(updatedOptions);
+  };
 
   // Update value in specs or options
   const handleSpecChange = (index, event) => {
-    const updatedSpecs = [...specs]
-    updatedSpecs[index] = event.target.value
-    setSpecs(updatedSpecs)
-  }
+    const updatedSpecs = [...specs];
+    updatedSpecs[index] = event.target.value;
+    setSpecs(updatedSpecs);
+  };
 
   const handleOptionChange = (index, event) => {
-    const updatedOptions = [...options]
-    updatedOptions[index] = event.target.value
-    setOptions(updatedOptions)
-  }
+    const updatedOptions = [...options];
+    updatedOptions[index] = event.target.value;
+    setOptions(updatedOptions);
+  };
 
   const onSubmit = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
     //Check if already + put at least 1 specs and options
     if (specs.length === 0 && options.length === 0) {
-      toast.error('Please select a spec and options')
-      return
+      toast.error("Please select a spec and options");
+      return;
     }
     // Check if there are empty fields in specs or options
     if (specs.some((spec) => !spec) || options.some((option) => !option)) {
-      toast.error('Please fill all specifications and options.')
-      return
+      toast.error("Please fill all specifications and options.");
+      return;
     }
 
     const result = {
@@ -127,10 +127,10 @@ function EditModel() {
       description: description,
       specs: specs,
       options: options,
-    }
+    };
 
-    editCarsModels(result)
-  }
+    editCarsModels(result);
+  };
 
   return (
     <>
@@ -138,11 +138,11 @@ function EditModel() {
         <Button
           variant="outline-primary"
           style={{
-            width: '150px',
-            marginRight: 'auto',
+            width: "150px",
+            marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: '/models' })
+            navigate({ to: "/admin/models" });
           }}
         >
           Back
@@ -307,7 +307,7 @@ function EditModel() {
         </Col>
       </Row>
     </>
-  )
+  );
 }
 
-export default EditModel
+export default EditModel;

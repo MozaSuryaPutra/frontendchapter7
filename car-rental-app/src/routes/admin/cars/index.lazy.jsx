@@ -52,7 +52,7 @@ function CarsIndex() {
             className="me-2"
             style={{ width: "150px", marginLeft: "auto" }}
             onClick={() => {
-              navigate({ to: "/cars/create" });
+              navigate({ to: "/admin/cars/create" });
             }}
           >
             Create New Car
