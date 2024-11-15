@@ -12,7 +12,7 @@ export const getType = async () => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const getTypeById = async (id) => {
@@ -29,7 +29,7 @@ export const getTypeById = async (id) => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const createType = async (request) => {
@@ -48,7 +48,7 @@ export const createType = async (request) => {
   });
 
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const updateType = async (id, request) => {
@@ -67,7 +67,10 @@ export const updateType = async (id, request) => {
   });
 
   const result = await response.json();
-  return result;
+  if (!result?.success) {
+    throw new Error(result?.message);
+  }
+  return result?.data;
 };
 
 export const deleteType = async (id) => {
@@ -84,5 +87,5 @@ export const deleteType = async (id) => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };

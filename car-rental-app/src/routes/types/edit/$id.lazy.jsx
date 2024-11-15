@@ -8,6 +8,9 @@ import Button from "react-bootstrap/Button";
 import { getTypeById, updateType } from "../../../service/carType";
 import { toast } from "react-toastify";
 import Protected from "../../../components/Auth/Protected";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/types/edit/$id")({
   component: () => (
@@ -23,49 +26,57 @@ function EditTypes() {
   const [body_style, setBodyStyle] = useState("");
   const [capacity, setCapacity] = useState("");
   const [fuel_type, setFuelType] = useState("");
+  const { token } = useSelector((state) => state.auth);
+
+  const { data, isSuccess, isLoading } = useQuery({
+    queryKey: ["types", id],
+    queryFn: () => getTypeById(id),
+    enabled: !!token,
+    retry: 0,
+  });
 
   useEffect(() => {
-    const fetchTypesData = async () => {
-      const type = await getTypeById(id);
-      if (!type?.success) {
-        navigate({ to: "/types" });
-      }
-      if (type?.success) {
-        setBodyStyle(type.data.body_style);
-        setCapacity(type.data.capacity);
-        setFuelType(type.data.fuel_type);
-      }
-    };
+    if (isSuccess && data) {
+      setBodyStyle(data.body_style || "");
+      setCapacity(data.capacity || "");
+      setFuelType(data.fuel_type || "");
+    }
+  }, [data, isSuccess]);
 
-    fetchTypesData();
-  }, [id, navigate]);
+  const { mutate: editCarType } = useMutation({
+    mutationFn: (body) => {
+      return updateType(id, body);
+    },
+    onSuccess: () => {
+      toast.success("Type edited successfully!");
+      navigate({ to: "/types" });
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
 
   const onSubmit = async (event) => {
     event.preventDefault();
-
+    console.log(body_style);
     if (capacity <= 0) {
       toast.error("Capacity harus lebih dari 0");
       return;
     }
 
-    if (capacity <= 0) {
-      toast.error("Capacity harus lebih dari 0");
-      return;
-    }
-
-    const result = await updateType(id, {
+    const result = {
       body_style: body_style,
       capacity: capacity,
       fuel_type: fuel_type,
-    });
+    };
 
-    if (result.success) {
-      toast.success("Types updated successfully!");
-      navigate({ to: `/types` });
-    } else {
-      toast.error("Failed to update Types.");
-    }
+    editCarType(result);
   };
+
+  // Handling loading state
+  if (isLoading) {
+    return <div>Loading...</div>; // You can return a loading spinner or placeholder here
+  }
 
   return (
     <>

@@ -11,6 +11,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { getModels } from "../../../service/models";
 import { getCarsById, updateCars } from "../../../service/cars";
 import Protected from "../../../components/Auth/Protected";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/cars/edit/$id")({
   component: () => (
@@ -30,41 +33,55 @@ function EditCars() {
   const [available, setAvailable] = useState(true);
   const [image, setImage] = useState(undefined); // Make sure to initialize image as null
   const [currentImage, setCurrentImage] = useState(""); // Initialize as null
-  const [models, setModels] = useState([]);
   const [modelsId, setModelsId] = useState(0);
+  const { token } = useSelector((state) => state.auth);
 
+  const {
+    data: models,
+    isSuccess,
+    isPending,
+  } = useQuery({
+    queryKey: ["models"],
+    queryFn: () => getModels(),
+    enabled: !!token,
+    retry: 0,
+  });
+
+  const {
+    data: cars,
+    isSuccess: carsisSuccess,
+    isPending: carsisPending,
+  } = useQuery({
+    queryKey: ["cars", id],
+    queryFn: () => getCarsById(id),
+    enabled: !!id,
+    retry: 0,
+  });
   useEffect(() => {
-    // Fetch model data to edit
-    const fetchCarsData = async () => {
-      const result = await getCarsById(id);
-      if (!result?.success) {
-        navigate({ to: "/cars" });
-      }
-      if (result?.success) {
-        setPlate(result.data.plate);
-        setRentPerDay(result.data.rentPerDay);
-        setYear(result.data.year);
-        setAvailableAt(
-          new Date(result.data.availableAt).toISOString().split("T")[0]
-        ); // Format date
-        setAvailable(result.data.available);
-        setImage(result.data.image);
-        setCurrentImage(result.data.image || "");
-        setModelsId(result.data.carsmodels_id);
-      }
-      console.log(result);
-    };
+    if (carsisSuccess && cars) {
+      setPlate(cars.plate);
+      setRentPerDay(cars.rentPerDay);
+      setYear(cars.year);
+      setAvailableAt(new Date(cars.availableAt).toISOString().split("T")[0]); // Format date
+      setAvailable(cars.available);
+      setImage(cars.image);
+      setCurrentImage(cars.image || "");
+      setModelsId(cars.carsmodels_id);
+    }
+  }, [cars, carsisSuccess]);
 
-    // Fetch types for dropdown selection
-    const getModelsData = async () => {
-      const result = await getModels();
-      if (result?.success) {
-        setModels(result?.data);
-      }
-    };
-    fetchCarsData();
-    getModelsData();
-  }, [id, navigate]);
+  const { mutate: editCars } = useMutation({
+    mutationFn: (body) => {
+      return updateCars(id, body);
+    },
+    onSuccess: () => {
+      toast.success("cars edited successfully!");
+      navigate({ to: "/cars" });
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -89,7 +106,7 @@ function EditCars() {
       return;
     }
 
-    const result = await updateCars(id, {
+    const result = {
       plate,
       rentPerDay: parseInt(rentPerDay, 10), // Ensure rentPerDay is an integer
       year: parseInt(year, 10), // Ensure year is an integer
@@ -97,14 +114,9 @@ function EditCars() {
       available,
       carsmodels_id: modelsId,
       image: image ? image : null, // If no image, set to null
-    });
+    };
 
-    if (result.success) {
-      toast.success("Cars updated successfully!");
-      navigate({ to: `/cars` });
-    } else {
-      toast.error("Failed to update cars.");
-    }
+    editCars(result);
   };
 
   return (
@@ -160,6 +172,7 @@ function EditCars() {
                         Select Car Model
                       </option>
                       {models &&
+                        isSuccess &&
                         models.length > 0 &&
                         models.map((c) => (
                           <option key={c.id} value={c.id}>

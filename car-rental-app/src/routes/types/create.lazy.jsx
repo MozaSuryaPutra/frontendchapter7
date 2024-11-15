@@ -8,7 +8,7 @@ import Button from "react-bootstrap/Button";
 import { createType } from "../../service/carType";
 import { toast } from "react-toastify";
 import Protected from "../../components/Auth/Protected";
-
+import { useMutation } from "@tanstack/react-query";
 export const Route = createLazyFileRoute("/types/create")({
   component: () => (
     <Protected roles={[1]}>
@@ -22,7 +22,18 @@ function CreateTypes() {
   const [capacity, setCapacity] = useState("");
   const [fuel_type, setFuelType] = useState("");
   const navigate = useNavigate();
-
+  const { mutate: createCarType } = useMutation({
+    mutationFn: (body) => {
+      return createType(body);
+    },
+    onSuccess: () => {
+      toast.success("Type created successfully!");
+      navigate({ to: "/types" });
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
   const onSubmit = async (event) => {
     event.preventDefault();
 
@@ -37,18 +48,13 @@ function CreateTypes() {
     }
 
     // Call createStudent function with form data
-    const result = await createType({
+    const result = {
       body_style: body_style,
       capacity: capacity,
       fuel_type: fuel_type,
-    });
+    };
 
-    if (result.success) {
-      toast.success("Type created successfully!");
-      navigate({ to: `/types` });
-    } else {
-      toast.error("Failed to create student.");
-    }
+    createCarType(result);
   };
 
   return (
