@@ -12,7 +12,7 @@ export const getCars = async () => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const getCarsById = async (id) => {
@@ -29,7 +29,7 @@ export const getCarsById = async (id) => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const createCars = async (request) => {
@@ -52,7 +52,7 @@ export const createCars = async (request) => {
   });
 
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const updateCars = async (id, request) => {
@@ -77,7 +77,7 @@ export const updateCars = async (id, request) => {
   });
 
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const deleteCars = async (id) => {
@@ -95,4 +95,28 @@ export const deleteCars = async (id) => {
   // get data
   const result = await response.json();
   return result;
+};
+
+export const getCarsSearched = async (capacity, availableAt) => {
+  const token = localStorage.getItem("token");
+  let params = {};
+
+  if (capacity) {
+    params.capacity = capacity;
+  }
+  if (age) {
+    params.availableAt = availableAt;
+  }
+  let url = `${import.meta.env.VITE_API_URL}/cars/search`;
+
+  const response = await fetch(url, {
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+    method: "GET",
+  });
+
+  // get data
+  const result = await response.json();
+  return result?.data;
 };

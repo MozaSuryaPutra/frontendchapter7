@@ -9,7 +9,9 @@ import { getType } from "../../service/carType";
 import { createModels } from "../../service/models";
 import Protected from "../../components/Auth/Protected";
 import { toast } from "react-toastify";
-
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 export const Route = createLazyFileRoute("/models/create")({
   component: () => (
     <Protected roles={[1]}>
@@ -20,26 +22,38 @@ export const Route = createLazyFileRoute("/models/create")({
 
 function CreateModel() {
   const navigate = useNavigate();
+  const { token } = useSelector((state) => state.auth);
+
   const [modelName, setModelName] = useState("");
   const [manufacturer, setManufacturer] = useState("");
   const [transmission, setTransmission] = useState("");
   const [description, setDescription] = useState("");
   const [specs, setSpecs] = useState([""]);
   const [options, setOptions] = useState([""]);
-  const [type, setType] = useState([]);
   const [type_id, setTypeId] = useState(0);
 
-  useEffect(() => {
-    const getTypeData = async () => {
-      const result = await getType();
-      if (result?.success) {
-        setType(result?.data);
-      }
-    };
+  const {
+    data: type,
+    isSuccess,
+    isPending,
+  } = useQuery({
+    queryKey: ["type"],
+    queryFn: getType,
+    enabled: !!token,
+  });
 
-    getTypeData();
-  }, []);
-
+  const { mutate: createCarModels } = useMutation({
+    mutationFn: (body) => {
+      return createModels(body);
+    },
+    onSuccess: () => {
+      toast.success("Type created successfully!");
+      navigate({ to: "/models" });
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
   // Add new empty spec and option
   const addSpecValue = () => setSpecs([...specs, ""]);
   const addOptionValue = () => setOptions([...options, ""]);
@@ -81,7 +95,7 @@ function CreateModel() {
       return;
     }
 
-    const result = await createModels({
+    const result = {
       model_name: modelName,
       manufacturer: manufacturer,
       transmission: transmission,
@@ -89,14 +103,9 @@ function CreateModel() {
       description: description,
       specs: specs,
       options: options,
-    });
+    };
 
-    if (result.success) {
-      toast.success("Model created successfully!");
-      navigate({ to: `/models` });
-    } else {
-      toast.error("Failed to create model.");
-    }
+    createCarModels(result);
   };
 
   return (
@@ -180,11 +189,17 @@ function CreateModel() {
                       <option disabled selected value="">
                         Select Type
                       </option>
-                      {type.map((t) => (
-                        <option key={t?.id} value={t?.id}>
-                          {t?.body_style} ({t?.id})
-                        </option>
-                      ))}
+                      {isPending && <option>Loading types...</option>}
+                      {isSuccess &&
+                        type &&
+                        type.map((t) => (
+                          <option key={t?.id} value={t?.id}>
+                            {t?.body_style} ({t?.id})
+                          </option>
+                        ))}
+                      {!isPending && !isSuccess && (
+                        <option disabled>Failed to load types</option>
+                      )}
                     </Form.Select>
                   </Col>
                 </Form.Group>

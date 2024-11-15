@@ -12,7 +12,7 @@ export const getModels = async () => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const getModelsById = async (id) => {
@@ -29,7 +29,7 @@ export const getModelsById = async (id) => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const createModels = async (request) => {
@@ -52,7 +52,7 @@ export const createModels = async (request) => {
   });
 
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const updateModels = async (id, request) => {
@@ -75,7 +75,7 @@ export const updateModels = async (id, request) => {
   });
 
   const result = await response.json();
-  return result;
+  return result?.data;
 };
 
 export const deleteModels = async (id) => {
@@ -92,5 +92,5 @@ export const deleteModels = async (id) => {
 
   // get data
   const result = await response.json();
-  return result;
+  return result?.data;
 };

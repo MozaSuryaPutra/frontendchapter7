@@ -9,6 +9,9 @@ import { getType } from "../../../service/carType";
 import { getModelsById, updateModels } from "../../../service/models";
 import Protected from "../../../components/Auth/Protected";
 import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/models/edit/$id")({
   component: () => (
@@ -27,37 +30,54 @@ function EditModel() {
   const [description, setDescription] = useState("");
   const [specs, setSpecs] = useState([""]);
   const [options, setOptions] = useState([""]);
-  const [type, setType] = useState([]);
   const [type_id, setTypeId] = useState(0);
+  const { token } = useSelector((state) => state.auth);
+  const {
+    data: type,
+    isSuccess,
+    isPending,
+  } = useQuery({
+    queryKey: ["type", id],
+    queryFn: () => getType(),
+    enabled: !!token,
+    retry: 0,
+  });
+
+  const {
+    data: models,
+    isSuccess: modelsisSuccess,
+    isPending: modelsisPending,
+  } = useQuery({
+    queryKey: ["models", id],
+    queryFn: () => getModelsById(id),
+    enabled: !!token,
+    retry: 0,
+  });
 
   useEffect(() => {
-    // Fetch model data to edit
-    const fetchModelData = async () => {
-      const result = await getModelsById(id);
-      if (result?.success) {
-        setModelName(result.data.model_name);
-        setManufacturer(result.data.manufacturer);
-        setTransmission(result.data.transmission);
-        setDescription(result.data.description);
-        setSpecs(result.data.specs || [""]);
-        setOptions(result.data.options || [""]);
-        setTypeId(result.data.type_id);
-      } else {
-        navigate({ to: `/models` });
-      }
-      console.log(result);
-    };
-    // Fetch types for dropdown selection
-    const getTypeData = async () => {
-      const result = await getType();
-      if (result?.success) {
-        setType(result?.data);
-      }
-    };
-    fetchModelData();
-    getTypeData();
-  }, [id]);
+    if (modelsisSuccess && models) {
+      setModelName(models.model_name);
+      setManufacturer(models.manufacturer);
+      setTransmission(models.transmission);
+      setDescription(models.description);
+      setSpecs(models.specs || [""]);
+      setOptions(models.options || [""]);
+      setTypeId(models.type_id);
+    }
+  }, [models, modelsisSuccess]);
 
+  const { mutate: editCarsModels } = useMutation({
+    mutationFn: (body) => {
+      return updateModels(id, body);
+    },
+    onSuccess: () => {
+      toast.success("Models edited successfully!");
+      navigate({ to: "/models" });
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
   // Add new empty spec and option
   const addSpecValue = () => setSpecs([...specs, ""]);
   const addOptionValue = () => setOptions([...options, ""]);
@@ -99,7 +119,7 @@ function EditModel() {
       return;
     }
 
-    const result = await updateModels(id, {
+    const result = {
       model_name: modelName,
       manufacturer: manufacturer,
       transmission: transmission,
@@ -107,14 +127,9 @@ function EditModel() {
       description: description,
       specs: specs,
       options: options,
-    });
+    };
 
-    if (result.success) {
-      toast.success("Model updated successfully!");
-      navigate({ to: `/models` });
-    } else {
-      toast.error("Failed to update model.");
-    }
+    editCarsModels(result);
   };
 
   return (
@@ -193,16 +208,22 @@ function EditModel() {
                       aria-label="Select Type"
                       required
                       value={type_id}
-                      onChange={(e) => setTypeId(e.target.value)}
+                      onChange={(e) => setTypeId(Number(e.target.value))}
                     >
                       <option disabled value="">
                         Select Type
                       </option>
-                      {type.map((t) => (
-                        <option key={t?.id} value={t?.id}>
-                          {t?.body_style} ({t?.id})
-                        </option>
-                      ))}
+                      {isPending && <option>Loading types...</option>}
+                      {isSuccess &&
+                        type &&
+                        type.map((t) => (
+                          <option key={t?.id} value={t?.id}>
+                            {t?.body_style} ({t?.id})
+                          </option>
+                        ))}
+                      {!isPending && !isSuccess && (
+                        <option disabled>Failed to load types</option>
+                      )}
                     </Form.Select>
                   </Col>
                 </Form.Group>

@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import { useSelector } from "react-redux";
 import { getCars } from "../../service/cars";
 import CarCard from "../../components/CarCard";
+import { useQuery } from "@tanstack/react-query";
 export const Route = createLazyFileRoute("/cars/")({
   component: CarsIndex,
 });
@@ -13,32 +14,27 @@ export const Route = createLazyFileRoute("/cars/")({
 function CarsIndex() {
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.auth);
-  const [cars, setCars] = useState([]);
-  const [models, setCarsModelsByid] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [cars, setCars] = useState([]); // Initialize as empty array
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const getCarsData = async () => {
-      setIsLoading(true);
-      const result = await getCars();
-      if (result.success) {
-        setCars(result.data);
-      }
-      setIsLoading(false);
-    };
+  const { data, isSuccess, isPending } = useQuery({
+    queryKey: ["cars"],
+    queryFn: () => getCars(),
+    enabled: !!token,
+  });
 
-    if (token) {
-      getCarsData();
+  useEffect(() => {
+    if (isSuccess) {
+      setCars(data || []); // Ensure data is an array, default to empty if null
     }
-  }, [token]);
+  }, [data, isSuccess]);
 
   if (!token) {
     navigate({ to: "/login" });
-    return;
+    return null;
   }
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Row className="mt-4">
         <h1>Loading...</h1>

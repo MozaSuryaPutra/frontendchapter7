@@ -8,6 +8,7 @@ import { getCarsById, deleteCars } from "../../service/cars";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import { useSelector } from "react-redux";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/cars/$id")({
   component: CarDetail,
@@ -16,31 +17,44 @@ export const Route = createLazyFileRoute("/cars/$id")({
 function CarDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-
   const { user } = useSelector((state) => state.auth);
 
-  const [car, setCar] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isNotFound, setIsNotFound] = useState(false);
+  // Query to fetch car data
+  const {
+    data: car,
+    isLoading,
+    isError,
+    isSuccess,
+  } = useQuery({
+    queryKey: ["car", id], // Updated queryKey
+    queryFn: () => getCarsById(id), // Updated queryFn
+    enabled: !!id, // only run query if there's an id
+  });
 
-  useEffect(() => {
-    const getDetailCarData = async (id) => {
-      setIsLoading(true);
-      const result = await getCarsById(id);
-      if (result?.success) {
-        setCar(result.data);
-        setIsNotFound(false);
-      } else {
-        setIsNotFound(true);
-      }
-      setIsLoading(false);
-    };
+  // Mutation to delete the car
+  const { mutate: deleteCar, isLoading: isDeleting } = useMutation({
+    mutationFn: deleteCars, // Updated mutation function
+    onSuccess: () => {
+      toast.success("Data deleted successfully!");
+      navigate({ to: "/cars" });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete the car");
+    },
+  });
 
-    if (id) {
-      getDetailCarData(id);
-    }
-  }, [id]);
+  // Handling if car is not found
+  if (isError) {
+    return (
+      <Row className="mt-5">
+        <Col>
+          <h1 className="text-center">Car is not found!</h1>
+        </Col>
+      </Row>
+    );
+  }
 
+  // Loading state
   if (isLoading) {
     return (
       <Row className="mt-5">
@@ -51,35 +65,16 @@ function CarDetail() {
     );
   }
 
-  if (isNotFound) {
-    return (
-      <Row className="mt-5">
-        <Col>
-          <h1 className="text-center">Car is not found!</h1>
-        </Col>
-      </Row>
-    );
-  }
-
-  const onDelete = async (event) => {
+  // Handle delete car confirmation
+  const onDelete = (event) => {
     event.preventDefault();
-
     confirmAlert({
       title: "Confirm to delete",
       message: "Are you sure to delete this data?",
       buttons: [
         {
           label: "Yes",
-          onClick: async () => {
-            const result = await deleteCars(id);
-            if (result?.success) {
-              toast.success("Data deleted successfully!");
-              navigate({ to: "/cars/" });
-              return;
-            }
-
-            toast.error(result?.message);
-          },
+          onClick: () => deleteCar(id),
         },
         {
           label: "No",
@@ -116,9 +111,8 @@ function CarDetail() {
               <Card.Text>Year: {car?.year}</Card.Text>
 
               <Card.Text>Available: {car?.available.toString()}</Card.Text>
-              <Card.Text>AvailableAt{car?.availableAt}</Card.Text>
+              <Card.Text>AvailableAt: {car?.availableAt}</Card.Text>
               <Card.Text>ID: {car?.id}</Card.Text>
-
 
               <Card.Text>Model Name: {car?.carsModels?.model_name}</Card.Text>
               <Card.Text>
@@ -128,9 +122,7 @@ function CarDetail() {
                 Transmission: {car?.carsModels?.transmission}
               </Card.Text>
 
-
               <Card.Text>Description: {car?.carsModels?.description}</Card.Text>
-
 
               <Card.Text>Specs: {car?.carsModels?.specs?.join(", ")}</Card.Text>
               <Card.Text>
@@ -162,8 +154,13 @@ function CarDetail() {
                   </Card.Text>
                   <Card.Text>
                     <div className="d-grid gap-2">
-                      <Button onClick={onDelete} variant="danger" size="md">
-                        Delete Car
+                      <Button
+                        onClick={onDelete}
+                        variant="danger"
+                        size="md"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? "Deleting..." : "Delete Car"}
                       </Button>
                     </div>
                   </Card.Text>
