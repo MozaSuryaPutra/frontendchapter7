@@ -4,13 +4,13 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
-import { getCarsById, deleteCars } from "../../service/cars";
+import { getCarsById, deleteCars } from "../../../service/cars";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import { useSelector } from "react-redux";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-export const Route = createLazyFileRoute("/cars/$id")({
+export const Route = createLazyFileRoute("/admin/cars/$id")({
   component: CarDetail,
 });
 
@@ -36,7 +36,7 @@ function CarDetail() {
     mutationFn: deleteCars, // Updated mutation function
     onSuccess: () => {
       toast.success("Data deleted successfully!");
-      navigate({ to: "/cars" });
+      navigate({ to: "/admin/cars" });
     },
     onError: (error) => {
       toast.error(error.message || "Failed to delete the car");
@@ -94,7 +94,7 @@ function CarDetail() {
             marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: "/cars" });
+            navigate({ to: "/admin/cars" });
           }}
         >
           Back
@@ -144,7 +144,7 @@ function CarDetail() {
                     <div className="d-grid gap-2">
                       <Button
                         as={Link}
-                        href={`/cars/edit/${id}`}
+                        to={`/admin/cars/edit/${id}`}
                         variant="primary"
                         size="md"
                       >

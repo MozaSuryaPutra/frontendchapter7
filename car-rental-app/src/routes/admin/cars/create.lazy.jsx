@@ -7,16 +7,14 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Image from "react-bootstrap/Image";
 import { toast } from "react-toastify";
-import { getModels } from "../../service/models";
-import { createCars } from "../../service/cars";
+import { getModels } from "../../../service/models";
+import { createCars } from "../../../service/cars";
 import { useMutation, useQuery } from "@tanstack/react-query";
-
+import Protected from "../../../components/Auth/Protected";
 import { useSelector } from "react-redux";
 
-import Protected from "../../components/Auth/Protected";
-
 // Rute untuk halaman CreateCars
-export const Route = createLazyFileRoute("/cars/create")({
+export const Route = createLazyFileRoute("/admin/cars/create")({
   component: () => (
     <Protected roles={[1]}>
       <CreateCars />
@@ -55,7 +53,7 @@ function CreateCars() {
     mutationFn: createCars,
     onSuccess: () => {
       toast.success("Car created successfully!");
-      navigate({ to: "/cars" });
+      navigate({ to: "/admin/cars" });
     },
     onError: (error) => {
       toast.error(error.message || "Failed to create car");
@@ -121,7 +119,9 @@ function CreateCars() {
             width: "150px",
             marginRight: "auto",
           }}
-          onClick={() => navigate("/cars")}
+          onClick={() => {
+            navigate({ to: "/admin/cars" });
+          }}
         >
           Back
         </Button>

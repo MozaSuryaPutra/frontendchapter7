@@ -1,37 +1,41 @@
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import React from "react";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import { useSelector } from "react-redux";
-import { getCars } from "../../service/cars";
-import CarCard from "../../components/CarCard";
+import { getModels } from "../../../service/models";
+import ModelsTable from "../../../components/ModelsTable";
 import { useQuery } from "@tanstack/react-query";
-export const Route = createLazyFileRoute("/cars/")({
-  component: CarsIndex,
+
+export const Route = createLazyFileRoute("/admin/models/")({
+  component: Models,
 });
 
-function CarsIndex() {
+function Models() {
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.auth);
-  const [cars, setCars] = useState([]); // Initialize as empty array
+
+  const [carsModels, setCarsModels] = useState([]);
+
   const navigate = useNavigate();
 
   const { data, isSuccess, isPending } = useQuery({
-    queryKey: ["cars"],
-    queryFn: () => getCars(),
+    queryKey: ["models"],
+    queryFn: () => getModels(),
     enabled: !!token,
   });
 
   useEffect(() => {
     if (isSuccess) {
-      setCars(data || []); // Ensure data is an array, default to empty if null
+      setCarsModels(data);
     }
   }, [data, isSuccess]);
 
   if (!token) {
     navigate({ to: "/login" });
-    return null;
+    return;
   }
 
   if (isPending) {
@@ -45,29 +49,25 @@ function CarsIndex() {
   return (
     <div>
       <Row className="mt-4 align-items-center">
-        <h1>Cars List:</h1>
+        <h1>Car Models List:</h1>
         {user?.role_id === 1 && (
           <Button
             className="me-2"
-            style={{ width: "150px", marginLeft: "auto" }}
+            style={{ width: "160px", marginLeft: "auto" }}
             onClick={() => {
-              navigate({ to: "/cars/create" });
+              navigate({ to: "/admin/models/create" });
             }}
           >
-            Create New Car
+            Create New Model
           </Button>
         )}
       </Row>
 
       <Row className="mt-4">
-        {cars.length === 0 ? (
-          <h1>Cars not found!</h1>
+        {carsModels.length === 0 ? (
+          <h1>Cars Models is not found!</h1>
         ) : (
-          cars.map((car) => (
-            <Col md={4} lg={3} key={car.id} className="ms-3 ms-lg-0">
-              <CarCard setCars={setCars} cars={car} />
-            </Col>
-          ))
+          <ModelsTable setCarsModels={setCarsModels} carsModels={carsModels} />
         )}
       </Row>
     </div>

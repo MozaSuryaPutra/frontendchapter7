@@ -8,14 +8,14 @@ import Button from "react-bootstrap/Button";
 import Image from "react-bootstrap/Image";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getModels } from "../../../service/models";
-import { getCarsById, updateCars } from "../../../service/cars";
-import Protected from "../../../components/Auth/Protected";
+import { getModels } from "../../../../service/models";
+import { getCarsById, updateCars } from "../../../../service/cars";
+import Protected from "../../../../components/Auth/Protected";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 
-export const Route = createLazyFileRoute("/cars/edit/$id")({
+export const Route = createLazyFileRoute("/admin/cars/edit/$id")({
   component: () => (
     <Protected roles={[1]}>
       <EditCars />
@@ -76,7 +76,7 @@ function EditCars() {
     },
     onSuccess: () => {
       toast.success("cars edited successfully!");
-      navigate({ to: "/cars" });
+      navigate({ to: "/admin/cars" });
     },
     onError: (err) => {
       toast.error(err?.message);
@@ -129,7 +129,7 @@ function EditCars() {
             marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: "/cars" });
+            navigate({ to: `/admin/cars/$id` });
           }}
         >
           Back

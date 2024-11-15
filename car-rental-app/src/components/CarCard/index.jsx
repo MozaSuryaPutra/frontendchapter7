@@ -72,7 +72,7 @@ const CarCard = ({ cars, setCars }) => {
 
         <Button
           onClick={() => {
-            navigate({ to: `/cars/${cars.id}` });
+            navigate({ to: `/admin/cars/${cars.id}` });
           }}
           variant="primary"
         >

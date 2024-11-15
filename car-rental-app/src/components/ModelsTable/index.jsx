@@ -159,7 +159,7 @@ const ModelsTable = ({ carsModels, setCarsModels }) => {
   };
 
   const handleEdit = (id) => {
-    navigate({ to: `/models/edit/${id}` });
+    navigate({ to: `/admin/models/edit/${id}` });
   };
 
   return (
