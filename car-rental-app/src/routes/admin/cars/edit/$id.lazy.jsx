@@ -1,109 +1,109 @@
-import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Card from "react-bootstrap/Card";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import Image from "react-bootstrap/Image";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { getModels } from "../../../service/models";
-import { getCarsById, updateCars } from "../../../service/cars";
-import Protected from "../../../components/Auth/Protected";
-import { useQuery } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
-import { useMutation } from "@tanstack/react-query";
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Card from 'react-bootstrap/Card'
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
+import Image from 'react-bootstrap/Image'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { getModels } from '../../../service/models'
+import { getCarsById, updateCars } from '../../../service/cars'
+import Protected from '../../../components/Auth/Protected'
+import { useQuery } from '@tanstack/react-query'
+import { useSelector } from 'react-redux'
+import { useMutation } from '@tanstack/react-query'
 
-export const Route = createLazyFileRoute("/cars/edit/$id")({
+export const Route = createLazyFileRoute('/admin/cars/edit/$id')({
   component: () => (
     <Protected roles={[1]}>
       <EditCars />
     </Protected>
   ),
-});
+})
 
 function EditCars() {
-  const navigate = useNavigate();
-  const { id } = Route.useParams();
-  const [plate, setPlate] = useState("");
-  const [rentPerDay, setRentPerDay] = useState("");
-  const [year, setYear] = useState("");
-  const [availableAt, setAvailableAt] = useState("");
-  const [available, setAvailable] = useState(true);
-  const [image, setImage] = useState(undefined); // Make sure to initialize image as null
-  const [currentImage, setCurrentImage] = useState(""); // Initialize as null
-  const [modelsId, setModelsId] = useState(0);
-  const { token } = useSelector((state) => state.auth);
+  const navigate = useNavigate()
+  const { id } = Route.useParams()
+  const [plate, setPlate] = useState('')
+  const [rentPerDay, setRentPerDay] = useState('')
+  const [year, setYear] = useState('')
+  const [availableAt, setAvailableAt] = useState('')
+  const [available, setAvailable] = useState(true)
+  const [image, setImage] = useState(undefined) // Make sure to initialize image as null
+  const [currentImage, setCurrentImage] = useState('') // Initialize as null
+  const [modelsId, setModelsId] = useState(0)
+  const { token } = useSelector((state) => state.auth)
 
   const {
     data: models,
     isSuccess,
     isPending,
   } = useQuery({
-    queryKey: ["models"],
+    queryKey: ['models'],
     queryFn: () => getModels(),
     enabled: !!token,
     retry: 0,
-  });
+  })
 
   const {
     data: cars,
     isSuccess: carsisSuccess,
     isPending: carsisPending,
   } = useQuery({
-    queryKey: ["cars", id],
+    queryKey: ['cars', id],
     queryFn: () => getCarsById(id),
     enabled: !!id,
     retry: 0,
-  });
+  })
   useEffect(() => {
     if (carsisSuccess && cars) {
-      setPlate(cars.plate);
-      setRentPerDay(cars.rentPerDay);
-      setYear(cars.year);
-      setAvailableAt(new Date(cars.availableAt).toISOString().split("T")[0]); // Format date
-      setAvailable(cars.available);
-      setImage(cars.image);
-      setCurrentImage(cars.image || "");
-      setModelsId(cars.carsmodels_id);
+      setPlate(cars.plate)
+      setRentPerDay(cars.rentPerDay)
+      setYear(cars.year)
+      setAvailableAt(new Date(cars.availableAt).toISOString().split('T')[0]) // Format date
+      setAvailable(cars.available)
+      setImage(cars.image)
+      setCurrentImage(cars.image || '')
+      setModelsId(cars.carsmodels_id)
     }
-  }, [cars, carsisSuccess]);
+  }, [cars, carsisSuccess])
 
   const { mutate: editCars } = useMutation({
     mutationFn: (body) => {
-      return updateCars(id, body);
+      return updateCars(id, body)
     },
     onSuccess: () => {
-      toast.success("cars edited successfully!");
-      navigate({ to: "/cars" });
+      toast.success('cars edited successfully!')
+      navigate({ to: '/cars' })
     },
     onError: (err) => {
-      toast.error(err?.message);
+      toast.error(err?.message)
     },
-  });
+  })
 
   const onSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
-    console.log("modelsId:", modelsId);
-    console.log("rentPerDay:", rentPerDay);
-    console.log("year:", year);
-    console.log("plate:", plate);
-    console.log("availableAt:", availableAt);
+    console.log('modelsId:', modelsId)
+    console.log('rentPerDay:', rentPerDay)
+    console.log('year:', year)
+    console.log('plate:', plate)
+    console.log('availableAt:', availableAt)
 
     if (rentPerDay <= 0) {
-      toast.error("Rent Per Day harus lebih dari 0");
-      return;
+      toast.error('Rent Per Day harus lebih dari 0')
+      return
     }
-    const platePattern = /^[A-Z]{3}-\d{4}$/;
+    const platePattern = /^[A-Z]{3}-\d{4}$/
     if (!platePattern.test(plate)) {
-      toast.error("Plate must be in the format 'ABC-1234'");
-      return;
+      toast.error("Plate must be in the format 'ABC-1234'")
+      return
     }
     if (year <= 1886 && year <= 0) {
-      toast.error("Year must more than 1886");
-      return;
+      toast.error('Year must more than 1886')
+      return
     }
 
     const result = {
@@ -114,10 +114,10 @@ function EditCars() {
       available,
       carsmodels_id: modelsId,
       image: image ? image : null, // If no image, set to null
-    };
+    }
 
-    editCars(result);
-  };
+    editCars(result)
+  }
 
   return (
     <>
@@ -125,11 +125,11 @@ function EditCars() {
         <Button
           variant="outline-primary"
           style={{
-            width: "150px",
-            marginRight: "auto",
+            width: '150px',
+            marginRight: 'auto',
           }}
           onClick={() => {
-            navigate({ to: "/cars" });
+            navigate({ to: '/cars' })
           }}
         >
           Back
@@ -189,9 +189,9 @@ function EditCars() {
                   </Form.Label>
                   <Col sm="9">
                     <Form.Select
-                      value={available ? "true" : "false"}
+                      value={available ? 'true' : 'false'}
                       onChange={(event) =>
-                        setAvailable(event.target.value === "true")
+                        setAvailable(event.target.value === 'true')
                       }
                       required
                     >
@@ -257,10 +257,10 @@ function EditCars() {
                       type="file"
                       placeholder="Choose File"
                       onChange={(event) => {
-                        setImage(event.target.files[0]);
+                        setImage(event.target.files[0])
                         setCurrentImage(
-                          URL.createObjectURL(event.target.files[0])
-                        );
+                          URL.createObjectURL(event.target.files[0]),
+                        )
                       }}
                       accept=".jpg,.png"
                     />
@@ -284,7 +284,7 @@ function EditCars() {
         </Col>
       </Row>
     </>
-  );
+  )
 }
 
-export default EditCars;
+export default EditCars

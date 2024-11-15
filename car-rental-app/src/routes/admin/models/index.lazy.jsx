@@ -5,29 +5,31 @@ import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import { getType } from "../../service/carType";
+import { getModels } from "../../../service/models";
+import ModelsTable from "../../../components/ModelsTable";
 import { useQuery } from "@tanstack/react-query";
-import TypeTable from "../../components/TypeTable";
 
-export const Route = createLazyFileRoute("/types/")({
-  component: Types,
+export const Route = createLazyFileRoute("/admin/models/")({
+  component: Models,
 });
 
-function Types() {
-  const navigate = useNavigate();
+function Models() {
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.auth);
 
-  const [car_types, setTypes] = useState([]);
+  const [carsModels, setCarsModels] = useState([]);
+
+  const navigate = useNavigate();
+
   const { data, isSuccess, isPending } = useQuery({
-    queryKey: ["types"],
-    queryFn: () => getType(),
+    queryKey: ["models"],
+    queryFn: () => getModels(),
     enabled: !!token,
   });
 
   useEffect(() => {
     if (isSuccess) {
-      setTypes(data);
+      setCarsModels(data);
     }
   }, [data, isSuccess]);
 
@@ -43,28 +45,29 @@ function Types() {
       </Row>
     );
   }
+
   return (
     <div>
       <Row className="mt-4 align-items-center">
-        <h1>Car Types List:</h1>
+        <h1>Car Models List:</h1>
         {user?.role_id === 1 && (
           <Button
             className="me-2"
-            style={{ width: "150px", marginLeft: "auto" }}
+            style={{ width: "160px", marginLeft: "auto" }}
             onClick={() => {
-              navigate({ to: "/types/create" });
+              navigate({ to: "/models/create" });
             }}
           >
-            Create New Type
+            Create New Model
           </Button>
         )}
       </Row>
 
       <Row className="mt-4">
-        {car_types.length === 0 ? (
-          <h1>Types data is not found!</h1>
+        {carsModels.length === 0 ? (
+          <h1>Cars Models is not found!</h1>
         ) : (
-          <TypeTable setTypes={setTypes} car_types={car_types} />
+          <ModelsTable setCarsModels={setCarsModels} carsModels={carsModels} />
         )}
       </Row>
     </div>

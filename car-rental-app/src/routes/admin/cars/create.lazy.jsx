@@ -1,43 +1,43 @@
-import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Card from "react-bootstrap/Card";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import Image from "react-bootstrap/Image";
-import { toast } from "react-toastify";
-import { getModels } from "../../service/models";
-import { createCars } from "../../service/cars";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Card from 'react-bootstrap/Card'
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
+import Image from 'react-bootstrap/Image'
+import { toast } from 'react-toastify'
+import { getModels } from '../../service/models'
+import { createCars } from '../../service/cars'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux'
 
-import Protected from "../../components/Auth/Protected";
+import Protected from '../../components/Auth/Protected'
 
 // Rute untuk halaman CreateCars
-export const Route = createLazyFileRoute("/cars/create")({
+export const Route = createLazyFileRoute('/admin/cars/create')({
   component: () => (
     <Protected roles={[1]}>
       <CreateCars />
     </Protected>
   ),
-});
+})
 
 // Komponen untuk membuat mobil baru
 function CreateCars() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   // State untuk input form
-  const [plate, setPlate] = useState("");
-  const [rentPerDay, setRentPerDay] = useState("");
-  const [year, setYear] = useState("");
-  const [availableAt, setAvailableAt] = useState("");
-  const [available, setAvailable] = useState(true);
-  const [image, setImage] = useState(null);
-  const [currentImage, setCurrentImage] = useState(null);
-  const [modelsId, setModelsId] = useState(0);
-  const { token } = useSelector((state) => state.auth);
+  const [plate, setPlate] = useState('')
+  const [rentPerDay, setRentPerDay] = useState('')
+  const [year, setYear] = useState('')
+  const [availableAt, setAvailableAt] = useState('')
+  const [available, setAvailable] = useState(true)
+  const [image, setImage] = useState(null)
+  const [currentImage, setCurrentImage] = useState(null)
+  const [modelsId, setModelsId] = useState(0)
+  const { token } = useSelector((state) => state.auth)
   // Mengambil data model mobil menggunakan useQuery
   const {
     data: models,
@@ -45,47 +45,47 @@ function CreateCars() {
     isError,
     isSuccess,
   } = useQuery({
-    queryKey: ["models"], // Updated queryKey
+    queryKey: ['models'], // Updated queryKey
     queryFn: () => getModels(), // Updated queryFn
     enabled: !!token, // only run query if there's an id
-  });
+  })
 
   // Mutasi untuk membuat mobil baru
   const { mutate: createCar, isLoading: isCreating } = useMutation({
     mutationFn: createCars,
     onSuccess: () => {
-      toast.success("Car created successfully!");
-      navigate({ to: "/cars" });
+      toast.success('Car created successfully!')
+      navigate({ to: '/cars' })
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to create car");
+      toast.error(error.message || 'Failed to create car')
     },
-  });
+  })
 
   // Menangani pengiriman form
   const onSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     // Validasi input
     if (!modelsId || !rentPerDay || !year || !plate || !availableAt) {
-      toast.error("Please fill in all required fields!");
-      return;
+      toast.error('Please fill in all required fields!')
+      return
     }
 
     if (rentPerDay <= 0) {
-      toast.error("Rent Per Day harus lebih dari 0");
-      return;
+      toast.error('Rent Per Day harus lebih dari 0')
+      return
     }
 
-    const platePattern = /^[A-Z]{3}-\d{4}$/;
+    const platePattern = /^[A-Z]{3}-\d{4}$/
     if (!platePattern.test(plate)) {
-      toast.error("Plate must be in the format 'ABC-1234'");
-      return;
+      toast.error("Plate must be in the format 'ABC-1234'")
+      return
     }
 
     if (year <= 1886) {
-      toast.error("Year must be more than 1886");
-      return;
+      toast.error('Year must be more than 1886')
+      return
     }
 
     // Membuat request untuk membuat mobil
@@ -97,19 +97,19 @@ function CreateCars() {
       available,
       carsmodels_id: modelsId,
       image: image ? image : null,
-    };
+    }
 
     // Menjalankan mutasi untuk membuat mobil
-    createCar(request);
-  };
+    createCar(request)
+  }
 
   // Loading dan Error handling untuk query models
   if (isLoading) {
-    return <div>Loading Cars...</div>;
+    return <div>Loading Cars...</div>
   }
 
   if (isError) {
-    return <div>Error fetching Carss</div>;
+    return <div>Error fetching Carss</div>
   }
 
   return (
@@ -118,10 +118,10 @@ function CreateCars() {
         <Button
           variant="outline-primary"
           style={{
-            width: "150px",
-            marginRight: "auto",
+            width: '150px',
+            marginRight: 'auto',
           }}
-          onClick={() => navigate("/cars")}
+          onClick={() => navigate('/cars')}
         >
           Back
         </Button>
@@ -182,9 +182,9 @@ function CreateCars() {
                   </Form.Label>
                   <Col sm="9">
                     <Form.Select
-                      value={available ? "true" : "false"}
+                      value={available ? 'true' : 'false'}
                       onChange={(event) =>
-                        setAvailable(event.target.value === "true")
+                        setAvailable(event.target.value === 'true')
                       }
                       required
                     >
@@ -250,10 +250,10 @@ function CreateCars() {
                     <Form.Control
                       type="file"
                       onChange={(event) => {
-                        setImage(event.target.files[0]);
+                        setImage(event.target.files[0])
                         setCurrentImage(
-                          URL.createObjectURL(event.target.files[0])
-                        );
+                          URL.createObjectURL(event.target.files[0]),
+                        )
                       }}
                       accept=".jpg,.png"
                     />
@@ -272,7 +272,7 @@ function CreateCars() {
 
                 <div className="d-grid gap-2">
                   <Button type="submit" variant="primary" disabled={isCreating}>
-                    {isCreating ? "Creating..." : "Create Car"}
+                    {isCreating ? 'Creating...' : 'Create Car'}
                   </Button>
                 </div>
               </Form>
@@ -282,7 +282,7 @@ function CreateCars() {
         <Col md={3}></Col>
       </Row>
     </>
-  );
+  )
 }
 
-export default CreateCars;
+export default CreateCars

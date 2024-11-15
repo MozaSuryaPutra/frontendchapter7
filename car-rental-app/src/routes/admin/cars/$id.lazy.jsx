@@ -1,23 +1,23 @@
-import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
-import { getCarsById, deleteCars } from "../../service/cars";
-import { toast } from "react-toastify";
-import { confirmAlert } from "react-confirm-alert";
-import { useSelector } from "react-redux";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { createLazyFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Card from 'react-bootstrap/Card'
+import Button from 'react-bootstrap/Button'
+import { getCarsById, deleteCars } from '../../service/cars'
+import { toast } from 'react-toastify'
+import { confirmAlert } from 'react-confirm-alert'
+import { useSelector } from 'react-redux'
+import { useQuery, useMutation } from '@tanstack/react-query'
 
-export const Route = createLazyFileRoute("/cars/$id")({
+export const Route = createLazyFileRoute('/admin/cars/$id')({
   component: CarDetail,
-});
+})
 
 function CarDetail() {
-  const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { id } = Route.useParams()
+  const navigate = useNavigate()
+  const { user } = useSelector((state) => state.auth)
 
   // Query to fetch car data
   const {
@@ -26,22 +26,22 @@ function CarDetail() {
     isError,
     isSuccess,
   } = useQuery({
-    queryKey: ["car", id], // Updated queryKey
+    queryKey: ['car', id], // Updated queryKey
     queryFn: () => getCarsById(id), // Updated queryFn
     enabled: !!id, // only run query if there's an id
-  });
+  })
 
   // Mutation to delete the car
   const { mutate: deleteCar, isLoading: isDeleting } = useMutation({
     mutationFn: deleteCars, // Updated mutation function
     onSuccess: () => {
-      toast.success("Data deleted successfully!");
-      navigate({ to: "/cars" });
+      toast.success('Data deleted successfully!')
+      navigate({ to: '/cars' })
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to delete the car");
+      toast.error(error.message || 'Failed to delete the car')
     },
-  });
+  })
 
   // Handling if car is not found
   if (isError) {
@@ -51,7 +51,7 @@ function CarDetail() {
           <h1 className="text-center">Car is not found!</h1>
         </Col>
       </Row>
-    );
+    )
   }
 
   // Loading state
@@ -62,27 +62,27 @@ function CarDetail() {
           <h1 className="text-center">Loading...</h1>
         </Col>
       </Row>
-    );
+    )
   }
 
   // Handle delete car confirmation
   const onDelete = (event) => {
-    event.preventDefault();
+    event.preventDefault()
     confirmAlert({
-      title: "Confirm to delete",
-      message: "Are you sure to delete this data?",
+      title: 'Confirm to delete',
+      message: 'Are you sure to delete this data?',
       buttons: [
         {
-          label: "Yes",
+          label: 'Yes',
           onClick: () => deleteCar(id),
         },
         {
-          label: "No",
+          label: 'No',
           onClick: () => {},
         },
       ],
-    });
-  };
+    })
+  }
 
   return (
     <>
@@ -90,11 +90,11 @@ function CarDetail() {
         <Button
           variant="outline-primary"
           style={{
-            width: "150px",
-            marginRight: "auto",
+            width: '150px',
+            marginRight: 'auto',
           }}
           onClick={() => {
-            navigate({ to: "/cars" });
+            navigate({ to: '/cars' })
           }}
         >
           Back
@@ -124,9 +124,9 @@ function CarDetail() {
 
               <Card.Text>Description: {car?.carsModels?.description}</Card.Text>
 
-              <Card.Text>Specs: {car?.carsModels?.specs?.join(", ")}</Card.Text>
+              <Card.Text>Specs: {car?.carsModels?.specs?.join(', ')}</Card.Text>
               <Card.Text>
-                Options: {car?.carsModels?.options?.join(", ")}
+                Options: {car?.carsModels?.options?.join(', ')}
               </Card.Text>
               <Card.Text>
                 Body Style: {car?.carsModels?.car_types.body_style}
@@ -160,7 +160,7 @@ function CarDetail() {
                         size="md"
                         disabled={isDeleting}
                       >
-                        {isDeleting ? "Deleting..." : "Delete Car"}
+                        {isDeleting ? 'Deleting...' : 'Delete Car'}
                       </Button>
                     </div>
                   </Card.Text>
@@ -172,5 +172,5 @@ function CarDetail() {
         <Col md={3}></Col>
       </Row>
     </>
-  );
+  )
 }

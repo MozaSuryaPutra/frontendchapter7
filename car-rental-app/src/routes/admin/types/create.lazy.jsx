@@ -9,7 +9,8 @@ import { createType } from "../../service/carType";
 import { toast } from "react-toastify";
 import Protected from "../../components/Auth/Protected";
 import { useMutation } from "@tanstack/react-query";
-export const Route = createLazyFileRoute("/types/create")({
+
+export const Route = createLazyFileRoute("/admin/types/create")({
   component: () => (
     <Protected roles={[1]}>
       <CreateTypes />

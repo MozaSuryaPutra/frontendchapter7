@@ -4,10 +4,11 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import { useSelector } from "react-redux";
-import { getCars } from "../../service/cars";
-import CarCard from "../../components/CarCard";
+import { getCars } from "../../../service/cars";
+import CarCard from "../../../components/CarCard";
 import { useQuery } from "@tanstack/react-query";
-export const Route = createLazyFileRoute("/cars/")({
+
+export const Route = createLazyFileRoute("/admin/cars/")({
   component: CarsIndex,
 });
 
