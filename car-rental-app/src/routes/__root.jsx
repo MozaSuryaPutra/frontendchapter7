@@ -12,7 +12,7 @@ export const Route = createRootRoute({
   component: () => (
     <>
       {/* Sidebar */}
-      <Sidebar />
+      {/* <Sidebar /> */}
 
       {/* Navbar */}
       <NavigationBar />
