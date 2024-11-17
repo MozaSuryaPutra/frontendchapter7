@@ -10,7 +10,7 @@ import { setToken } from "../redux/slices/auth";
 import { login } from "../service/auth";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
+import { useMutation } from "@tanstack/react-query";
 export const Route = createLazyFileRoute("/login")({
   component: Login,
 });
@@ -24,12 +24,26 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    // get token from local storage
-    if (token) {
+  if (token) {
+    navigate({ to: "/" });
+  }
+
+  // Mutation is used for POST, PUT, PATCH and DELETE
+  const { mutate: loginUser } = useMutation({
+    mutationFn: (body) => {
+      return login(body);
+    },
+    onSuccess: (data) => {
+      // set token to global state
+      dispatch(setToken(data?.token));
+
+      // redirect to home
       navigate({ to: "/" });
-    }
-  }, [navigate, token]);
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -42,34 +56,22 @@ function Login() {
     };
 
     // hit the login API with the data
-    const result = await login(body);
-    if (result.success) {
-      // set token to global state
-      dispatch(setToken(result.data.token));
-
-      // redirect to home
-      navigate({ to: "/" });
-      return;
-    }
-
-    toast.error(result?.message);
+    loginUser(body);
   };
 
   return (
     <>
-      <Row style={{ overflow: 'hidden', height: '100vh', width: '100vw' }}>
+      <Row style={{ overflow: "hidden", height: "100vh", width: "100vw" }}>
         <Col md={6}>
-          <Container 
-            className="p-5 d-flex justify-content-center align-items-center" 
-            style={{ minHeight: '100vh' }}
+          <Container
+            className="p-5 d-flex justify-content-center align-items-center"
+            style={{ minHeight: "100vh" }}
           >
             <div className="w-100 m-lg-5 m-0">
               <h2 className="mb-4">Welcome Back!</h2>
               <Form onSubmit={onSubmit}>
                 <Form.Group as={Col} className="mb-4" controlId="email">
-                  <Form.Label className="mb-3">
-                    Email
-                  </Form.Label>
+                  <Form.Label className="mb-3">Email</Form.Label>
                   <Form.Control
                     type="email"
                     placeholder="Email"
@@ -79,9 +81,7 @@ function Login() {
                   />
                 </Form.Group>
                 <Form.Group as={Col} className="mb-5" controlId="password">
-                  <Form.Label className="mb-3">
-                    Password
-                  </Form.Label>
+                  <Form.Label className="mb-3">Password</Form.Label>
                   <Form.Control
                     type="password"
                     placeholder="Password"
@@ -91,28 +91,37 @@ function Login() {
                   />
                 </Form.Group>
                 <div className="d-grid gap-2">
-                  <Button 
-                    type="submit" 
-                    style={{ backgroundColor: '#0D28A6', borderColor: '#0D28A6' }} 
-                    className="rounded-0"
+                  <Button
+                    type="submit"
+                    style={{
+                      backgroundColor: "#0D28A6",
+                      borderColor: "#0D28A6",
+                    }}
+                    className="rounded-1"
                   >
                     Login
                   </Button>
                 </div>
               </Form>
-              <p className='text-center p-4'>Don't have an account yet? <a href="/register">Sign up here</a></p>
+              <p className="text-center p-4">
+                Don't have an account yet? <a href="/register">Sign up here</a>
+              </p>
             </div>
           </Container>
         </Col>
-        <Col md={6} style={{ overflow: 'hidden', height: '100vh', position: 'relative' }}  className="d-none d-md-block">
+        <Col
+          md={6}
+          style={{ overflow: "hidden", height: "100vh", position: "relative" }}
+          className="d-none d-md-block"
+        >
           <img
             src="/login-page.png"
             alt="Login Page"
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              position: 'absolute',
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              position: "absolute",
               top: 0,
               left: 0,
             }}

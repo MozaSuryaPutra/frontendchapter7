@@ -6,14 +6,16 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { register } from "../service/auth";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { setToken } from "../redux/slices/auth";
 export const Route = createLazyFileRoute("/register")({
   component: Register,
 });
 
 function Register() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { token } = useSelector((state) => state.auth);
@@ -24,19 +26,33 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState(undefined);
 
-  useEffect(() => {
-    // get token from local storage
-    if (token) {
+  // get token from local storage
+  if (token) {
+    navigate({ to: "/" });
+  }
+
+  // Mutation is used for POST, PUT, PATCH and DELETE
+  const { mutate: registerUser } = useMutation({
+    mutationFn: (body) => {
+      return register(body);
+    },
+    onSuccess: (data) => {
+      // set token to global state
+      dispatch(setToken(data?.token));
+
+      // redirect to home
       navigate({ to: "/" });
-    }
-  }, [token, navigate]);
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
 
   const onSubmit = async (event) => {
     event.preventDefault();
 
     if (password != confirmPassword) {
       toast.error("Password and password confirmation must be same!");
-      return;
     }
 
     // hit API here
@@ -46,18 +62,7 @@ function Register() {
       password,
       profilePicture,
     };
-    const result = await register(request);
-    if (result.success) {
-      // save token to local storage
-      localStorage.setItem("token", result.data.token);
-
-      // redirect to home
-      window.location = "/";
-
-      return;
-    }
-
-    toast.error(result?.message);
+    registerUser(request);
   };
 
   return (
@@ -84,8 +89,6 @@ function Register() {
                   />
                 </Form.Group>
                 <Form.Group as={Col} className="mb-2" controlId="email">
-
-
                   <Form.Label className="mb-2">
                     Email (Jika Validation Failed berarti Ada email yang sama)
                   </Form.Label>
@@ -151,7 +154,7 @@ function Register() {
                       backgroundColor: "#0D28A6",
                       borderColor: "#0D28A6",
                     }}
-                    className="rounded-0"
+                    className="rounded-1"
                   >
                     Register
                   </Button>

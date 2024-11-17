@@ -5,6 +5,8 @@ import Button from "react-bootstrap/Button";
 import { useNavigate } from "@tanstack/react-router";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { useSelector } from "react-redux";
+import { format } from "date-fns";
+import { FaClock, FaCog, FaIdCard, FaUserFriends } from "react-icons/fa";
 
 const CardContainer = styled.div`
   max-width: 300px;
@@ -15,11 +17,13 @@ const CardContainer = styled.div`
   background-color: #fff;
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Center horizontally */
 `;
 
 const ImageContainer = styled.div`
   height: 200px;
   overflow: hidden;
+  margin-bottom: 15px;
 `;
 
 const CarImage = styled.img`
@@ -29,25 +33,24 @@ const CarImage = styled.img`
 `;
 
 const CardBody = styled.div`
-  padding: 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
 `;
 
 const CardTitle = styled.h3`
-  font-size: 18px;
-  margin-bottom: 10px;
+  font-size: 14px;
+  margin-bottom: 6px;
   color: #333;
 `;
 
 const CardText = styled.p`
   font-size: 14px;
-  margin: 5px 0;
+  margin: 3px 0;
   color: #555;
 `;
 
-const CarCard = ({ cars, setCars }) => {
+const SearchCard = ({ cars, setCars }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
@@ -62,25 +65,28 @@ const CarCard = ({ cars, setCars }) => {
         <CarImage src={cars.image} />
       </ImageContainer>
       <CardBody>
-        {/* Gunakan model_name dari models yang dikirim */}
-        <CardTitle>{cars.carsModels.model_name}</CardTitle>
+        <CardTitle>{cars.carsModels.car_types.body_style.charAt(0).toUpperCase() +
+      cars.carsModels.car_types.body_style.slice(1)}</CardTitle>
 
-        <CardText>RP {cars.rentPerDay}/Hari</CardText>
-        <CardText>Available At: {cars.availableAt}</CardText>
-        <CardText>Year: {cars.year}</CardText>
-        <CardText>Plate: {cars.plate}</CardText>
+        <CardText><b>Rp. {cars.rentPerDay.toLocaleString("id-ID")}/Hari</b></CardText>
+        <CardText className='mb-2'>{cars.carsModels.description}</CardText>
+        <CardText><FaClock className="mb-1 me-1"/> {format(new Date(cars.availableAt), "MMMM dd, yyyy 'at' hh:mm a")}</CardText>
+        <CardText><FaIdCard className="mb-1 me-1"/> {cars.plate}</CardText>
+        <CardText><FaCog className="mb-1 me-1"/> {cars.carsModels.transmission}</CardText>
+        <CardText><FaUserFriends className="mb-1 me-1"/> {cars.carsModels.car_types.capacity} Orang</CardText>
 
         <Button
           onClick={() => {
-            navigate({ to: `/admin/cars/${cars.id}` });
+            navigate({ to: `/cars/${cars.id}` });
           }}
-          variant="primary"
+          style={{ backgroundColor: "#5CB85F", border:"#5CB85F" }}
+          className="rounded-0 my-3"
         >
-          Detail Car
+          Detail Mobil
         </Button>
       </CardBody>
     </CardContainer>
   );
 };
 
-export default CarCard;
+export default SearchCard;

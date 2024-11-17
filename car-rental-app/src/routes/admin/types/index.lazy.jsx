@@ -5,50 +5,44 @@ import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import { getType } from "../../service/carType";
+import { getType } from "../../../service/carType";
+import { useQuery } from "@tanstack/react-query";
+import TypeTable from "../../../components/TypeTable";
 
-import TypeTable from "../../components/TypeTable";
-
-export const Route = createLazyFileRoute("/types/")({
+export const Route = createLazyFileRoute("/admin/types/")({
   component: Types,
 });
 
 function Types() {
+  const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.auth);
 
   const [car_types, setTypes] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const { data, isSuccess, isPending } = useQuery({
+    queryKey: ["types"],
+    queryFn: () => getType(),
+    enabled: !!token,
+  });
 
   useEffect(() => {
-    const getTypesData = async () => {
-      setIsLoading(true);
-      const result = await getType();
-      if (result.success) {
-        setTypes(result.data);
-      }
-      setIsLoading(false);
-    };
-
-    if (token) {
-      getTypesData();
+    if (isSuccess) {
+      setTypes(data);
     }
-  }, [token]);
+  }, [data, isSuccess]);
 
   if (!token) {
     navigate({ to: "/login" });
     return;
   }
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Row className="mt-4">
         <h1>Loading...</h1>
       </Row>
     );
   }
-
   return (
     <div>
       <Row className="mt-4 align-items-center">
@@ -58,7 +52,7 @@ function Types() {
             className="me-2"
             style={{ width: "150px", marginLeft: "auto" }}
             onClick={() => {
-              navigate({ to: "/types/create" });
+              navigate({ to: "/admin/types/create" });
             }}
           >
             Create New Type

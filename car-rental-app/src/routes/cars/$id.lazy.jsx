@@ -1,179 +1,203 @@
-import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
-import { getCarsById, deleteCars } from "../../service/cars";
-import { toast } from "react-toastify";
-import { confirmAlert } from "react-confirm-alert";
-import { useSelector } from "react-redux";
+import { createLazyFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Container, Form, Row, Col, Card, Button } from "react-bootstrap";
+import { getCarsById, deleteCars } from '../../service/cars'
+import { useSelector } from 'react-redux'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import FooterSection from '../../components/FooterSection'
+import { FaCalendar, FaCog, FaUser } from 'react-icons/fa';
+import { format } from 'date-fns';
 
-export const Route = createLazyFileRoute("/cars/$id")({
+export const Route = createLazyFileRoute('/cars/$id')({
   component: CarDetail,
-});
+})
 
 function CarDetail() {
-  const { id } = Route.useParams();
-  const navigate = useNavigate();
+  const { id } = Route.useParams()
+  const navigate = useNavigate()
+  const { user } = useSelector((state) => state.auth)
 
-  const { user } = useSelector((state) => state.auth);
+  // Query to fetch car data
+  const {
+    data: car,
+    isLoading,
+    isError,
+    isSuccess,
+  } = useQuery({
+    queryKey: ['car', id], // Updated queryKey
+    queryFn: () => getCarsById(id), // Updated queryFn
+    enabled: !!id, // only run query if there's an id
+  })
 
-  const [car, setCar] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isNotFound, setIsNotFound] = useState(false);
-
-  useEffect(() => {
-    const getDetailCarData = async (id) => {
-      setIsLoading(true);
-      const result = await getCarsById(id);
-      if (result?.success) {
-        setCar(result.data);
-        setIsNotFound(false);
-      } else {
-        setIsNotFound(true);
-      }
-      setIsLoading(false);
-    };
-
-    if (id) {
-      getDetailCarData(id);
-    }
-  }, [id]);
-
-  if (isLoading) {
-    return (
-      <Row className="mt-5">
-        <Col>
-          <h1 className="text-center">Loading...</h1>
-        </Col>
-      </Row>
-    );
-  }
-
-  if (isNotFound) {
+  // Handling if car is not found
+  if (isError) {
     return (
       <Row className="mt-5">
         <Col>
           <h1 className="text-center">Car is not found!</h1>
         </Col>
       </Row>
-    );
+    )
   }
 
-  const onDelete = async (event) => {
-    event.preventDefault();
+  // Loading state
+  // if (isLoading) {
+  //   return (
+  //     <Row className="mt-5">
+  //       <Col>
+  //         <h1 className="text-center">Loading...</h1>
+  //       </Col>
+  //     </Row>
+  //   )
+  // }
 
-    confirmAlert({
-      title: "Confirm to delete",
-      message: "Are you sure to delete this data?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: async () => {
-            const result = await deleteCars(id);
-            if (result?.success) {
-              toast.success("Data deleted successfully!");
-              navigate({ to: "/cars/" });
-              return;
-            }
-
-            toast.error(result?.message);
-          },
-        },
-        {
-          label: "No",
-          onClick: () => {},
-        },
-      ],
-    });
-  };
+  // const handleBackClick = () => {
+  //   // Try going back in history using navigate(-1)
+  //   navigate(-1);
+  //   // If there’s no history, we navigate to a fallback route
+  //   setTimeout(() => {
+  //     if (window.history.state && window.history.state.idx <= 1) {
+  //       // Check if we are at the root or there’s no previous page
+  //       navigate({ to: "/search" });  // Your fallback route (or homepage, etc.)
+  //     }
+  //   }, 200);  // Delay to give time for navigate(-1) to potentially take effect
+  // };
 
   return (
     <>
-      <Row className="ms-2 mt-4 align-items-center">
-        <Button
-          variant="outline-primary"
-          style={{
-            width: "150px",
-            marginRight: "auto",
-          }}
-          onClick={() => {
-            navigate({ to: "/cars" });
-          }}
-        >
-          Back
-        </Button>
-      </Row>
+      <div style={{ backgroundColor: "#f1f3ff", height:"200px"}}></div>
+      <div
+        id="search-container"
+        className="container search-container"
+        style={{
+          width: "50%",
+          margin: "",
+          position: "relative",
+          top: "-85px",
+          zIndex: 1,
+          backgroundColor: "#fff",
+          padding: "15px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          borderRadius: "5px",
+        }}
+      >
+        <span><b>Pencariannmu</b></span>
+        <Row className="justify-content-center mt-2">
+          <Col lg={5} md={6} className="mb-3">
+            <Form.Group controlId="date-select">
+              <Form.Label>Tanggal</Form.Label>
+              <Form.Control
+                type="date"
+                value="availableAt"
+                disabled
+              />
+            </Form.Group>
+          </Col>
+          <Col lg={7} md={6} className="mb-3">
+            <Form.Group controlId="capacity-select">
+              <Form.Label>Jumlah Penumpang</Form.Label>
+              <Form.Select
+                value="capacity"
+                disabled
+              >
+                <option value="" selected hidden>
+                  Pilih Kapasitas
+                </option>
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <option key={num} value={num}>
+                    {num}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
+      </div>
 
-      <Row className="mt-3 mb-3">
-        <Col className="offset-md-3">
+      <Container>
+      {/* Loading state */}
+      {isLoading ? (
+        <Col>
+          <h4>Loading...</h4>
+        </Col>
+      ) : (
+      <Row className="mb-3 g-5">
+        <Col md={7}>
           <Card>
-            <Card.Img variant="top" src={car?.image} />
-            <Card.Body>
-              <Card.Title>{car?.rentPerDay}</Card.Title>
-              <Card.Text>Plate: {car?.plate}</Card.Text>
-              <Card.Text>Year: {car?.year}</Card.Text>
+            <Card.Body className='mt-3'>
+              <Card.Title>Detail Paket</Card.Title>
+              <ul>
+                <li>Manufacturer : {car?.carsModels?.manufacturer}</li>
+                <li>Model Name : {car?.carsModels?.model_name}</li>
+                <li>Plate : {car?.plate}</li>
+                <li>Specs : {car?.carsModels?.specs?.join(', ')}</li>
+                <li>Options : {car?.carsModels?.options?.join(', ')}</li>
+                <li>Fuel Type : {car?.carsModels?.car_types.fuel_type}</li>
+                <li>Available : {car?.available.toString().charAt(0).toUpperCase() + car?.available.toString().slice(1)}</li>
+                <li>Available at : {format(new Date(car?.availableAt), "MMMM dd, yyyy 'at' hh:mm a")}</li>
+              </ul>
 
-              <Card.Text>Available: {car?.available.toString()}</Card.Text>
-              <Card.Text>AvailableAt{car?.availableAt}</Card.Text>
-              <Card.Text>ID: {car?.id}</Card.Text>
+              <span>Include</span>
+              <ul className='mt-2'>
+                <li>Apa saja yang termasuk dalam paket misal durasi max 12 jam</li>
+                <li>Sudah termasuk bensin selama 12 jam</li>
+                <li>Sudah termasuk Tiket Wisata</li>
+                <li>Sudah termasuk pajak</li>
+              </ul>
 
-
-              <Card.Text>Model Name: {car?.carsModels?.model_name}</Card.Text>
-              <Card.Text>
-                Manufacturer: {car?.carsModels?.manufacturer}
-              </Card.Text>
-              <Card.Text>
-                Transmission: {car?.carsModels?.transmission}
-              </Card.Text>
-
-
-              <Card.Text>Description: {car?.carsModels?.description}</Card.Text>
-
-
-              <Card.Text>Specs: {car?.carsModels?.specs?.join(", ")}</Card.Text>
-              <Card.Text>
-                Options: {car?.carsModels?.options?.join(", ")}
-              </Card.Text>
-              <Card.Text>
-                Body Style: {car?.carsModels?.car_types.body_style}
-              </Card.Text>
-              <Card.Text>
-                Capacity: {car?.carsModels?.car_types.capacity}
-              </Card.Text>
-              <Card.Text>
-                Fuel Type: {car?.carsModels?.car_types.fuel_type}
-              </Card.Text>
-
-              {user?.role_id === 1 && (
-                <>
-                  <Card.Text>
-                    <div className="d-grid gap-2">
-                      <Button
-                        as={Link}
-                        href={`/cars/edit/${id}`}
-                        variant="primary"
-                        size="md"
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                  </Card.Text>
-                  <Card.Text>
-                    <div className="d-grid gap-2">
-                      <Button onClick={onDelete} variant="danger" size="md">
-                        Delete Car
-                      </Button>
-                    </div>
-                  </Card.Text>
-                </>
-              )}
+              <span>Exclude</span>
+              <ul className='mt-2'>
+                <li>Tidak termasuk biaya makan sopir Rp 75.000/hari</li>
+                <li>Jika overtime lebih dari 12 jam akan ada tambahan biaya Rp 20.000/jam</li>
+                <li>Tidak termasuk akomodasi penginapan</li>
+              </ul>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}></Col>
+        <Col md={5}>
+          <Card className='p-4'>
+            <Card.Img variant="top" src={car?.image} />
+              <Card.Title className='mt-3'>{car?.carsModels.car_types.body_style}</Card.Title>
+              <Row className="text-md-start">
+              <Card.Text>
+                <small>
+                  {[
+                    { icon: <FaUser className="mb-1 me-1" />, value: `${car?.carsModels.car_types.capacity} Orang` },
+                    { icon: <FaCog className="mb-1 mx-1 ms-3" />, value: car?.carsModels.transmission },
+                    { icon: <FaCalendar className="mb-1 mx-1 ms-3" />, value: `Tahun ${car?.year}` },
+                  ].map((item, index) => (
+                    <span key={index}>
+                      {item.icon} {item.value}
+                    </span>
+                  ))}
+                </small>
+              </Card.Text>
+              </Row>
+
+              <Row className="mt-4 mb-2 d-flex justify-content-between">
+                <div className="col-auto">
+                  <Card.Text>Total</Card.Text>
+                </div>
+                <div className="col-auto text-end">
+                  <Card.Text>
+                    <b>Rp. {car?.rentPerDay.toLocaleString("id-ID")}</b>
+                  </Card.Text>
+                </div>
+              </Row>
+              <Button
+                onClick={() => {
+                  navigate({ to: `/search` });
+                }}
+                style={{ backgroundColor: "#5CB85F", border: "#5CB85F" }}
+                className="rounded-0"
+              >
+                Kembali
+              </Button>
+          </Card>
+        </Col>
       </Row>
+      )}
+      </Container>
+      <FooterSection />
     </>
-  );
+  )
 }

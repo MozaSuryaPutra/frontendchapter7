@@ -5,10 +5,11 @@ import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import { getModels } from "../../service/models";
-import ModelsTable from "../../components/ModelsTable";
+import { getModels } from "../../../service/models";
+import ModelsTable from "../../../components/ModelsTable";
+import { useQuery } from "@tanstack/react-query";
 
-export const Route = createLazyFileRoute("/models/")({
+export const Route = createLazyFileRoute("/admin/models/")({
   component: Models,
 });
 
@@ -17,30 +18,27 @@ function Models() {
   const { user } = useSelector((state) => state.auth);
 
   const [carsModels, setCarsModels] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const getCarsModels = async () => {
-      setIsLoading(true);
-      const result = await getModels();
-      if (result.success) {
-        setCarsModels(result.data);
-      }
-      setIsLoading(false);
-    };
+  const { data, isSuccess, isPending } = useQuery({
+    queryKey: ["models"],
+    queryFn: () => getModels(),
+    enabled: !!token,
+  });
 
-    if (token) {
-      getCarsModels();
+  useEffect(() => {
+    if (isSuccess) {
+      setCarsModels(data);
     }
-  }, [token]);
+  }, [data, isSuccess]);
 
   if (!token) {
     navigate({ to: "/login" });
     return;
   }
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Row className="mt-4">
         <h1>Loading...</h1>
@@ -57,7 +55,7 @@ function Models() {
             className="me-2"
             style={{ width: "160px", marginLeft: "auto" }}
             onClick={() => {
-              navigate({ to: "/models/create" });
+              navigate({ to: "/admin/models/create" });
             }}
           >
             Create New Model

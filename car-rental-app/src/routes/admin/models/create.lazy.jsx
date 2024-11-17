@@ -6,58 +6,55 @@ import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { getType } from "../../../service/carType";
-import { getModelsById, updateModels } from "../../../service/models";
+import { createModels } from "../../../service/models";
 import Protected from "../../../components/Auth/Protected";
 import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
-export const Route = createLazyFileRoute("/models/edit/$id")({
+export const Route = createLazyFileRoute("/admin/models/create")({
   component: () => (
     <Protected roles={[1]}>
-      <EditModel />
+      <CreateModel />
     </Protected>
   ),
 });
 
-function EditModel() {
+function CreateModel() {
   const navigate = useNavigate();
-  const { id } = Route.useParams();
+  const { token } = useSelector((state) => state.auth);
+
   const [modelName, setModelName] = useState("");
   const [manufacturer, setManufacturer] = useState("");
   const [transmission, setTransmission] = useState("");
   const [description, setDescription] = useState("");
   const [specs, setSpecs] = useState([""]);
   const [options, setOptions] = useState([""]);
-  const [type, setType] = useState([]);
   const [type_id, setTypeId] = useState(0);
 
-  useEffect(() => {
-    // Fetch model data to edit
-    const fetchModelData = async () => {
-      const result = await getModelsById(id);
-      if (result?.success) {
-        setModelName(result.data.model_name);
-        setManufacturer(result.data.manufacturer);
-        setTransmission(result.data.transmission);
-        setDescription(result.data.description);
-        setSpecs(result.data.specs || [""]);
-        setOptions(result.data.options || [""]);
-        setTypeId(result.data.type_id);
-      } else {
-        navigate({ to: `/models` });
-      }
-      console.log(result);
-    };
-    // Fetch types for dropdown selection
-    const getTypeData = async () => {
-      const result = await getType();
-      if (result?.success) {
-        setType(result?.data);
-      }
-    };
-    fetchModelData();
-    getTypeData();
-  }, [id]);
+  const {
+    data: type,
+    isSuccess,
+    isPending,
+  } = useQuery({
+    queryKey: ["type"],
+    queryFn: getType,
+    enabled: !!token,
+  });
 
+  const { mutate: createCarModels } = useMutation({
+    mutationFn: (body) => {
+      return createModels(body);
+    },
+    onSuccess: () => {
+      toast.success("Type created successfully!");
+      navigate({ to: "/admin/models" });
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
   // Add new empty spec and option
   const addSpecValue = () => setSpecs([...specs, ""]);
   const addOptionValue = () => setOptions([...options, ""]);
@@ -99,7 +96,7 @@ function EditModel() {
       return;
     }
 
-    const result = await updateModels(id, {
+    const result = {
       model_name: modelName,
       manufacturer: manufacturer,
       transmission: transmission,
@@ -107,14 +104,9 @@ function EditModel() {
       description: description,
       specs: specs,
       options: options,
-    });
+    };
 
-    if (result.success) {
-      toast.success("Model updated successfully!");
-      navigate({ to: `/models` });
-    } else {
-      toast.error("Failed to update model.");
-    }
+    createCarModels(result);
   };
 
   return (
@@ -127,16 +119,17 @@ function EditModel() {
             marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: "/models" });
+            navigate({ to: "/admin/models" });
           }}
         >
           Back
         </Button>
       </Row>
-      <Row className="mt-5">
-        <Col className="ms-lg-5">
+
+      <Row className=" d-flex align-items-center mb-3">
+        <Col Col md={8} lg={6} className="ms-auto me-auto">
           <Card>
-            <Card.Header className="text-center">Edit Model</Card.Header>
+            <Card.Header className="text-center">Create Model</Card.Header>
             <Card.Body>
               <Form onSubmit={onSubmit}>
                 <Form.Group as={Row} className="mb-3" controlId="model_name">
@@ -192,17 +185,22 @@ function EditModel() {
                     <Form.Select
                       aria-label="Select Type"
                       required
-                      value={type_id}
-                      onChange={(e) => setTypeId(e.target.value)}
+                      onChange={(e) => setTypeId(Number(e.target.value))}
                     >
-                      <option disabled value="">
+                      <option disabled selected value="">
                         Select Type
                       </option>
-                      {type.map((t) => (
-                        <option key={t?.id} value={t?.id}>
-                          {t?.body_style} ({t?.id})
-                        </option>
-                      ))}
+                      {isPending && <option>Loading types...</option>}
+                      {isSuccess &&
+                        type &&
+                        type.map((t) => (
+                          <option key={t?.id} value={t?.id}>
+                            {t?.body_style} ({t?.id})
+                          </option>
+                        ))}
+                      {!isPending && !isSuccess && (
+                        <option disabled>Failed to load types</option>
+                      )}
                     </Form.Select>
                   </Col>
                 </Form.Group>
@@ -277,7 +275,7 @@ function EditModel() {
 
                 <div className="d-grid gap-2">
                   <Button type="submit" variant="primary">
-                    Update Model
+                    Create Model
                   </Button>
                 </div>
               </Form>
@@ -289,4 +287,4 @@ function EditModel() {
   );
 }
 
-export default EditModel;
+export default CreateModel;

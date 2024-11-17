@@ -5,41 +5,79 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { getType } from "../../service/carType";
-import { createModels } from "../../service/models";
-import Protected from "../../components/Auth/Protected";
+import { getType } from "../../../../service/carType";
+import { getModelsById, updateModels } from "../../../../service/models";
+import Protected from "../../../../components/Auth/Protected";
 import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
 
-export const Route = createLazyFileRoute("/models/create")({
+export const Route = createLazyFileRoute("/admin/models/edit/$id")({
   component: () => (
     <Protected roles={[1]}>
-      <CreateModel />
+      <EditModel />
     </Protected>
   ),
 });
 
-function CreateModel() {
+function EditModel() {
   const navigate = useNavigate();
+  const { id } = Route.useParams();
   const [modelName, setModelName] = useState("");
   const [manufacturer, setManufacturer] = useState("");
   const [transmission, setTransmission] = useState("");
   const [description, setDescription] = useState("");
   const [specs, setSpecs] = useState([""]);
   const [options, setOptions] = useState([""]);
-  const [type, setType] = useState([]);
   const [type_id, setTypeId] = useState(0);
+  const { token } = useSelector((state) => state.auth);
+  const {
+    data: type,
+    isSuccess,
+    isPending,
+  } = useQuery({
+    queryKey: ["type", id],
+    queryFn: () => getType(),
+    enabled: !!token,
+    retry: 0,
+  });
+
+  const {
+    data: models,
+    isSuccess: modelsisSuccess,
+    isPending: modelsisPending,
+  } = useQuery({
+    queryKey: ["models", id],
+    queryFn: () => getModelsById(id),
+    enabled: !!token,
+    retry: 0,
+  });
 
   useEffect(() => {
-    const getTypeData = async () => {
-      const result = await getType();
-      if (result?.success) {
-        setType(result?.data);
-      }
-    };
+    if (modelsisSuccess && models) {
+      setModelName(models.model_name);
+      setManufacturer(models.manufacturer);
+      setTransmission(models.transmission);
+      setDescription(models.description);
+      setSpecs(models.specs || [""]);
+      setOptions(models.options || [""]);
+      setTypeId(models.type_id);
+    }
+  }, [models, modelsisSuccess]);
 
-    getTypeData();
-  }, []);
-
+  const { mutate: editCarsModels } = useMutation({
+    mutationFn: (body) => {
+      return updateModels(id, body);
+    },
+    onSuccess: () => {
+      toast.success("Models edited successfully!");
+      navigate({ to: "/admin/models" });
+    },
+    onError: (err) => {
+      toast.error(err?.message);
+    },
+  });
   // Add new empty spec and option
   const addSpecValue = () => setSpecs([...specs, ""]);
   const addOptionValue = () => setOptions([...options, ""]);
@@ -81,7 +119,7 @@ function CreateModel() {
       return;
     }
 
-    const result = await createModels({
+    const result = {
       model_name: modelName,
       manufacturer: manufacturer,
       transmission: transmission,
@@ -89,14 +127,9 @@ function CreateModel() {
       description: description,
       specs: specs,
       options: options,
-    });
+    };
 
-    if (result.success) {
-      toast.success("Model created successfully!");
-      navigate({ to: `/models` });
-    } else {
-      toast.error("Failed to create model.");
-    }
+    editCarsModels(result);
   };
 
   return (
@@ -109,17 +142,16 @@ function CreateModel() {
             marginRight: "auto",
           }}
           onClick={() => {
-            navigate({ to: "/models" });
+            navigate({ to: "/admin/models" });
           }}
         >
           Back
         </Button>
       </Row>
-
-      <Row className=" d-flex align-items-center mb-3">
-        <Col Col md={8} lg={6} className="ms-auto me-auto">
+      <Row className="mt-5">
+        <Col className="ms-lg-5">
           <Card>
-            <Card.Header className="text-center">Create Model</Card.Header>
+            <Card.Header className="text-center">Edit Model</Card.Header>
             <Card.Body>
               <Form onSubmit={onSubmit}>
                 <Form.Group as={Row} className="mb-3" controlId="model_name">
@@ -175,16 +207,23 @@ function CreateModel() {
                     <Form.Select
                       aria-label="Select Type"
                       required
+                      value={type_id}
                       onChange={(e) => setTypeId(Number(e.target.value))}
                     >
-                      <option disabled selected value="">
+                      <option disabled value="">
                         Select Type
                       </option>
-                      {type.map((t) => (
-                        <option key={t?.id} value={t?.id}>
-                          {t?.body_style} ({t?.id})
-                        </option>
-                      ))}
+                      {isPending && <option>Loading types...</option>}
+                      {isSuccess &&
+                        type &&
+                        type.map((t) => (
+                          <option key={t?.id} value={t?.id}>
+                            {t?.body_style} ({t?.id})
+                          </option>
+                        ))}
+                      {!isPending && !isSuccess && (
+                        <option disabled>Failed to load types</option>
+                      )}
                     </Form.Select>
                   </Col>
                 </Form.Group>
@@ -259,7 +298,7 @@ function CreateModel() {
 
                 <div className="d-grid gap-2">
                   <Button type="submit" variant="primary">
-                    Create Model
+                    Update Model
                   </Button>
                 </div>
               </Form>
@@ -271,4 +310,4 @@ function CreateModel() {
   );
 }
 
-export default CreateModel;
+export default EditModel;

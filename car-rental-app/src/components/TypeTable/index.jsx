@@ -7,6 +7,7 @@ import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { useSelector } from "react-redux";
 import { deleteType, getType } from "../../service/carType";
+import { useMutation } from "@tanstack/react-query";
 
 const TableContainer = styled.div`
   max-width: 100%;
@@ -16,8 +17,9 @@ const TableContainer = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 0;
 
-   @media (max-width: 768px) {
+  @media (max-width: 768px) {
     border-radius: 0px;
+  }
 `;
 
 const StyledTable = styled.table`
@@ -124,30 +126,28 @@ const TypeTable = ({ car_types, setTypes }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
-  const onDelete = async (id) => {
+  const { mutate: deleting, isPending: isDeleteProcessing } = useMutation({
+    mutationFn: deleteType,
+    onSuccess: async () => {
+      toast.success("Type deleted successfully!");
+
+      // Refresh data after deletion
+      const refreshedTypes = await getType();
+      setTypes(refreshedTypes);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error deleting type");
+    },
+  });
+
+  const onDelete = (id) => {
     confirmAlert({
       title: "Confirm to delete",
       message: "Are you sure to delete this data?",
       buttons: [
         {
           label: "Yes",
-          onClick: async () => {
-            const result = await deleteType(id);
-            if (result?.success) {
-              toast.success("Data deleted successfully!");
-
-              const refreshTypes = await getType();
-              if (refreshTypes?.success) {
-                setTypes(refreshTypes.data);
-              } else {
-                setTypes([]);
-              }
-
-              return;
-            }
-
-            toast.error(result?.message);
-          },
+          onClick: () => deleting(id),
         },
         {
           label: "No",
@@ -158,7 +158,7 @@ const TypeTable = ({ car_types, setTypes }) => {
   };
 
   const handleEdit = (id) => {
-    navigate({ to: `/types/edit/${id}` });
+    navigate({ to: `/admin/types/edit/${id}` });
   };
 
   return (
