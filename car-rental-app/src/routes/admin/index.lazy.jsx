@@ -4,7 +4,11 @@ import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 
 export const Route = createLazyFileRoute("/admin/")({
-  component: Index,
+  component: () => (
+    <Protected roles={[1]}>
+      <Index />
+    </Protected>
+  ),
 });
 
 function Index() {

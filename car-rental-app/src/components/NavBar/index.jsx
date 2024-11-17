@@ -245,7 +245,7 @@ const NavigationBar = () => {
                     {user?.role_id === 1 && (
                       <Link
                         to="/admin"
-                        className="btn btn-primary ms-lg-3 mt-3 mt-lg-0 mb-2"
+                        className="btn btn-primary mt-3 mt-lg-0 mb-2 me-3"
                         style={{
                           backgroundColor: "#0D28A6",
                           borderColor: "#0D28A6",

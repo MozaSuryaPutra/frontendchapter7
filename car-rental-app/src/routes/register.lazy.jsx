@@ -154,7 +154,7 @@ function Register() {
                       backgroundColor: "#0D28A6",
                       borderColor: "#0D28A6",
                     }}
-                    className="rounded-0"
+                    className="rounded-1"
                   >
                     Register
                   </Button>

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Container, Form, Row, Col, Button } from "react-bootstrap";
 import { getCarsSearched } from "../service/cars";
-import CarCard from "../components/CarCard";
+import SearchCard from "../components/SearchCard";
 import FooterSection from "../components/FooterSection";
 
 export const Route = createLazyFileRoute("/search")({
@@ -52,6 +52,8 @@ function CariMobil() {
                 kualitas terbaik dengan harga terjangkau. Selalu siap melayani
                 kebutuhanmu untuk sewa mobil selama 24 jam.
               </p>
+              <div className="d-flex justify-content-start ms-lg-5 ps-lg-5 py-3">
+              </div>
             </Col>
             <Col
               lg={6}
@@ -69,7 +71,7 @@ function CariMobil() {
 
       <div
         id="search-container"
-        className="container search-container mt-4"
+        className="container search-container mt-4 px-3"
         style={{
           width: "50%",
           margin: "0 auto",
@@ -77,12 +79,13 @@ function CariMobil() {
           top: "-80px",
           zIndex: 1,
           backgroundColor: "#fff",
-          padding: "20px",
+          padding: "15px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          borderRadius: "10px",
+          borderRadius: "5px",
         }}
       >
-        <Row className="justify-content-center">
+        <span><b>Pencariannmu</b></span>
+        <Row className="justify-content-center mt-2">
           <Col lg={4} md={6} className="mb-3">
             <Form.Group controlId="date-select">
               <Form.Label>Tanggal</Form.Label>
@@ -117,7 +120,7 @@ function CariMobil() {
             className="mb-3 mt-4 d-flex align-items-end justify-content-center"
           >
             <Button
-              className="btn btn-primary"
+              className="btn"
               id="search-btn"
               type="button"
               style={{
@@ -133,7 +136,7 @@ function CariMobil() {
           </Col>
         </Row>
       </div>
-
+ 
       <Container className="mt-4">
         <Row className="g-5" id="cars-content">
           {isLoading ? (
@@ -141,7 +144,7 @@ function CariMobil() {
           ) : error ? (
             <p>Error loading cars. Please try again later.</p>
           ) : (
-            cars?.map((car) => <CarCard key={car.id} cars={car} />)
+            cars?.map((car) => <SearchCard key={car.id} cars={car} />)
           )}
         </Row>
       </Container>

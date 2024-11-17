@@ -11,7 +11,11 @@ import { useSelector } from "react-redux";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/admin/cars/$id")({
-  component: CarDetail,
+  component: () => (
+    <Protected roles={[1]}>
+      <CarDetail />
+    </Protected>
+  ),
 });
 
 function CarDetail() {

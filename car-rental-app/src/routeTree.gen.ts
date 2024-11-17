@@ -22,6 +22,7 @@ const ProfileLazyImport = createFileRoute('/profile')()
 const LoginLazyImport = createFileRoute('/login')()
 const IndexLazyImport = createFileRoute('/')()
 const AdminIndexLazyImport = createFileRoute('/admin/')()
+const CarsIdLazyImport = createFileRoute('/cars/$id')()
 const AdminTypesIndexLazyImport = createFileRoute('/admin/types/')()
 const AdminModelsIndexLazyImport = createFileRoute('/admin/models/')()
 const AdminCarsIndexLazyImport = createFileRoute('/admin/cars/')()
@@ -70,6 +71,12 @@ const AdminIndexLazyRoute = AdminIndexLazyImport.update({
   path: '/admin/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/admin/index.lazy').then((d) => d.Route))
+
+const CarsIdLazyRoute = CarsIdLazyImport.update({
+  id: '/cars/$id',
+  path: '/cars/$id',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/cars/$id.lazy').then((d) => d.Route))
 
 const AdminTypesIndexLazyRoute = AdminTypesIndexLazyImport.update({
   id: '/admin/types/',
@@ -190,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchLazyImport
       parentRoute: typeof rootRoute
     }
+    '/cars/$id': {
+      id: '/cars/$id'
+      path: '/cars/$id'
+      fullPath: '/cars/$id'
+      preLoaderRoute: typeof CarsIdLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -278,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileLazyRoute
   '/register': typeof RegisterLazyRoute
   '/search': typeof SearchLazyRoute
+  '/cars/$id': typeof CarsIdLazyRoute
   '/admin': typeof AdminIndexLazyRoute
   '/admin/cars/$id': typeof AdminCarsIdLazyRoute
   '/admin/cars/create': typeof AdminCarsCreateLazyRoute
@@ -297,6 +312,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileLazyRoute
   '/register': typeof RegisterLazyRoute
   '/search': typeof SearchLazyRoute
+  '/cars/$id': typeof CarsIdLazyRoute
   '/admin': typeof AdminIndexLazyRoute
   '/admin/cars/$id': typeof AdminCarsIdLazyRoute
   '/admin/cars/create': typeof AdminCarsCreateLazyRoute
@@ -317,6 +333,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileLazyRoute
   '/register': typeof RegisterLazyRoute
   '/search': typeof SearchLazyRoute
+  '/cars/$id': typeof CarsIdLazyRoute
   '/admin/': typeof AdminIndexLazyRoute
   '/admin/cars/$id': typeof AdminCarsIdLazyRoute
   '/admin/cars/create': typeof AdminCarsCreateLazyRoute
@@ -338,6 +355,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/search'
+    | '/cars/$id'
     | '/admin'
     | '/admin/cars/$id'
     | '/admin/cars/create'
@@ -356,6 +374,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/search'
+    | '/cars/$id'
     | '/admin'
     | '/admin/cars/$id'
     | '/admin/cars/create'
@@ -374,6 +393,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/search'
+    | '/cars/$id'
     | '/admin/'
     | '/admin/cars/$id'
     | '/admin/cars/create'
@@ -394,6 +414,7 @@ export interface RootRouteChildren {
   ProfileLazyRoute: typeof ProfileLazyRoute
   RegisterLazyRoute: typeof RegisterLazyRoute
   SearchLazyRoute: typeof SearchLazyRoute
+  CarsIdLazyRoute: typeof CarsIdLazyRoute
   AdminIndexLazyRoute: typeof AdminIndexLazyRoute
   AdminCarsIdLazyRoute: typeof AdminCarsIdLazyRoute
   AdminCarsCreateLazyRoute: typeof AdminCarsCreateLazyRoute
@@ -413,6 +434,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileLazyRoute: ProfileLazyRoute,
   RegisterLazyRoute: RegisterLazyRoute,
   SearchLazyRoute: SearchLazyRoute,
+  CarsIdLazyRoute: CarsIdLazyRoute,
   AdminIndexLazyRoute: AdminIndexLazyRoute,
   AdminCarsIdLazyRoute: AdminCarsIdLazyRoute,
   AdminCarsCreateLazyRoute: AdminCarsCreateLazyRoute,
@@ -441,6 +463,7 @@ export const routeTree = rootRoute
         "/profile",
         "/register",
         "/search",
+        "/cars/$id",
         "/admin/",
         "/admin/cars/$id",
         "/admin/cars/create",
@@ -468,6 +491,9 @@ export const routeTree = rootRoute
     },
     "/search": {
       "filePath": "search.lazy.jsx"
+    },
+    "/cars/$id": {
+      "filePath": "cars/$id.lazy.jsx"
     },
     "/admin/": {
       "filePath": "admin/index.lazy.jsx"
