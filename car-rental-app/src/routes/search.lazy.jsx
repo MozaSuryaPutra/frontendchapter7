@@ -52,8 +52,7 @@ function CariMobil() {
                 kualitas terbaik dengan harga terjangkau. Selalu siap melayani
                 kebutuhanmu untuk sewa mobil selama 24 jam.
               </p>
-              <div className="d-flex justify-content-start ms-lg-5 ps-lg-5 py-3">
-              </div>
+              <div className="d-flex justify-content-start ms-lg-5 ps-lg-5 py-3"></div>
             </Col>
             <Col
               lg={6}
@@ -84,7 +83,9 @@ function CariMobil() {
           borderRadius: "5px",
         }}
       >
-        <span><b>Pencariannmu</b></span>
+        <span>
+          <b>Pencariannmu</b>
+        </span>
         <Row className="justify-content-center mt-2">
           <Col lg={4} md={6} className="mb-3">
             <Form.Group controlId="date-select">
@@ -136,13 +137,13 @@ function CariMobil() {
           </Col>
         </Row>
       </div>
- 
+
       <Container className="mt-4">
         <Row className="g-5" id="cars-content">
           {isLoading ? (
             <p>Loading...</p>
           ) : error ? (
-            <p>Error loading cars. Please try again later.</p>
+            <h1 className="text-center w-100">No cars available</h1>
           ) : (
             cars?.map((car) => <SearchCard key={car.id} cars={car} />)
           )}

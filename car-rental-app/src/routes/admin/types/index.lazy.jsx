@@ -8,7 +8,7 @@ import Button from "react-bootstrap/Button";
 import { getType } from "../../../service/carType";
 import { useQuery } from "@tanstack/react-query";
 import TypeTable from "../../../components/TypeTable";
-
+import Protected from "../../../components/Auth/Protected";
 export const Route = createLazyFileRoute("/admin/types/")({
   component: () => (
     <Protected roles={[1]}>

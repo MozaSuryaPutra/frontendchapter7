@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { getCars } from "../../../service/cars";
 import CarCard from "../../../components/CarCard";
 import { useQuery } from "@tanstack/react-query";
-
+import Protected from "../../../components/Auth/Protected";
 export const Route = createLazyFileRoute("/admin/cars/")({
   component: () => (
     <Protected roles={[1]}>

@@ -2,7 +2,7 @@ import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
-
+import Protected from "../../components/Auth/Protected";
 export const Route = createLazyFileRoute("/admin/")({
   component: () => (
     <Protected roles={[1]}>

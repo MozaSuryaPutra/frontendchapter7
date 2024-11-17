@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import { useSelector } from "react-redux";
 import { useQuery, useMutation } from "@tanstack/react-query";
-
+import Protected from "../../../components/Auth/Protected";
 export const Route = createLazyFileRoute("/admin/cars/$id")({
   component: () => (
     <Protected roles={[1]}>
