@@ -9,7 +9,11 @@ import CarCard from "../../../components/CarCard";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/admin/cars/")({
-  component: CarsIndex,
+  component: () => (
+    <Protected roles={[1]}>
+      <CarsIndex />
+    </Protected>
+  ),
 });
 
 function CarsIndex() {

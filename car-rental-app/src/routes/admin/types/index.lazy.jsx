@@ -10,7 +10,11 @@ import { useQuery } from "@tanstack/react-query";
 import TypeTable from "../../../components/TypeTable";
 
 export const Route = createLazyFileRoute("/admin/types/")({
-  component: Types,
+  component: () => (
+    <Protected roles={[1]}>
+      <Types />
+    </Protected>
+  ),
 });
 
 function Types() {

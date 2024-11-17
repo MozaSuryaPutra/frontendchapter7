@@ -10,7 +10,11 @@ import ModelsTable from "../../../components/ModelsTable";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/admin/models/")({
-  component: Models,
+  component: () => (
+    <Protected roles={[1]}>
+      <Models />
+    </Protected>
+  ),
 });
 
 function Models() {
